@@ -1,0 +1,32 @@
+{
+   "action": {
+      "default_popup": "popup.html",
+      "default_title": "WhatFlow CRM"
+   },
+   "background": {
+      "service_worker": "js/background.js"
+   },
+   "content_scripts": [ {
+      "css": [ "css/content.css" ],
+      "js": [ "js/library/jquery.js", "js/Utils/data.js", "js/Utils/ga-code.js", "js/Utils/translate.js", "js/Utils/helper.js", "js/Utils/popup-handler.js", "js/Utils/messenger.js", "js/content.js" ],
+      "matches": [ "*://web.whatsapp.com/*" ]
+   } ],
+   "default_locale": "en",
+   "description": "__MSG_Desc__",
+   "icons": {
+      "128": "logo/large.png",
+      "16": "logo/small.png",
+      "48": "logo/medium.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjPbwM7x/Yy5WU96kKovF4scwD/TOCVtWjIwrS19GBTxBG9vhmKHVctoUTuiC1LvuwaBYmRGAH7ZEdr6Dpn+GWKMvDej7ecqt0MHhK4oNHDB/IXDqxWl/jYzSDx9adJeTHP9X0+GLNlpOmGF9sIvOnHloVwCiWkCFsmQosTNpmmLeL36kLYKQurvf3zcyej4jvheTIyTy8y1VzNcOhOyH2YK55PpxLtiz5dx04m29KNsS/ky03/EXsgPc52MRzPS7iV64Qoo5J7owujddVq3RvsrWwaHwwHi+JjlCH5bC8GMhOdmRTllrM7x5wLX7wv6qKUGqvVn343NSznkWv44StQIDAQAB",
+   "manifest_version": 3,
+   "name": "WhatFlow CRM",
+   "permissions": [ "storage", "unlimitedStorage", "notifications", "tabs", "activeTab", "identity", "identity.email" ],
+   "host_permissions": [ "*://what-flow.vercel.app/*", "*://*.vercel.app/*" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "4.6.9",
+   "web_accessible_resources": [ {
+      "matches": [ "\u003Call_urls>" ],
+      "resources": [ "/js/inject.js", "/logo/*", "/sounds/*", "/blog.html", "/css/blog.css", "/js/blog.js" ]
+   } ]
+}
