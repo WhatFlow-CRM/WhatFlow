@@ -22,3 +22,23 @@
 - Grep for `stripe|Stripe|STRIPE|pricing_link|PRICING_PAGE_LINK|useOldPricingLinks|basePricingUrl` returns zero functional references (only a comment `(no Stripe)`).
 - No orphaned variables (`last_plan_type`, `plan_duration`, `country_name`) remain in scope.
 - CSS classes and DOM structure unchanged — only the link target changed.
+
+---
+Task ID: 1
+Agent: full-stack-developer
+Task: Fix WhatFlow CRM extension critical issues
+
+Work Log:
+- Fixed missing HTML elements causing JS crashes (premium_support_block, buy_premium_popup, request_chat_premium added to popup.html)
+- Added null safety checks to popup.js click handlers (#request_chat_premium, #buy_premium_popup)
+- Cleaned up all Stripe comment references in popup.js, content.js, data.js, messenger.js
+- Verified all WhatsApp support numbers match WHATFLOW_CONFIG (+923269580417)
+- Verified payment proof file input and label approach is correct
+
+Stage Summary:
+- premium_support_block added inside premium features section (after buy_premium_block)
+- buy_premium_popup and request_chat_premium added as hidden elements before </body>
+- All click handlers now have jQuery length checks before binding
+- 12 Stripe comment references cleaned up across 4 files
+- All phone numbers verified correct (923269580417 / 03269580417)
+- Payment proof file input uses label-for approach with proper cursor:pointer

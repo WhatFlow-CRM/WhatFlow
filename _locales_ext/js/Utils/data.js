@@ -792,7 +792,7 @@ let MESSAGE_LIMIT = {
     }
 }
 
-// Stripe pricing links removed - WhatFlow CRM uses Easypaisa/JazzCash payment proof system
+// WhatFlow CRM uses Easypaisa/JazzCash payment proof system
 // See WHATFLOW_CONFIG at top of file for current payment configuration
 let PRICING_PAGE_LINK = {};
 

@@ -1887,13 +1887,12 @@ async function getBasicPremiumExpiredButton(basicPrice, basicConvertedPrice, adv
 }
 
 async function getAdvancePremiumExpiredButton(advancePrice, advanceConvertedPrice, pricing_link) {
-    // WhatFlow CRM: No Stripe links - use WhatFlow CRM payment flow
     const advanceButtonHtml = await advanceButton('', advancePrice, advanceConvertedPrice, "", false)
     return advanceButtonHtml
 }
 
 function getAnnualButtonHtml() {
-    // WhatFlow CRM: Replaced Stripe link with show_plan_pricing_popup
+    // WhatFlow CRM: Annual plan button
     return `<span class="popup-btn pricing-green-btn CtaBtn show-advance-popup" style="font-weight:bold;">
           Buy Annual 
       </span>`;
@@ -1947,7 +1946,7 @@ function displayNotification(message, daysAfterInstall, planType, gapBetweenDays
 }
 
 function getPricingLink(countryName, duration) {
-    // WhatFlow CRM: Stripe links removed - returns empty (pricing is now via Easypaisa/JazzCash)
+    // WhatFlow CRM: Returns empty (pricing handled via Easypaisa/JazzCash)
     return '';
 }
 
@@ -1961,7 +1960,7 @@ async function create_pricing_buttons_html(popup_name) {
     let advancePrice = pricing_data.advance_price[country_name];
     let advanceConvertedPrice = await convertPriceToLocale(advancePrice.substring(1));
 
-    // WhatFlow CRM: No Stripe links - use WhatFlow CRM payment flow
+    // WhatFlow CRM: Custom pricing popup
     let advanceButtonHtml = await advanceButton('', advancePrice, advanceConvertedPrice, popup_name, false);
     let showAdvanceButton = false;
 
@@ -2098,7 +2097,7 @@ async function create_popup_html(popup_name, date_diff) {
 }
 
 async function show_plan_pricing_popup(activePlan = 'basic') {
-    // WhatFlow CRM: Replaced Stripe-based pricing with Easypaisa/JazzCash payment
+    // WhatFlow CRM: Plan pricing popup
     const pricing_popup_trial_features = ['Export Group Contacts', "Translate Conversation", "Quick Replies", "Customizable Time Gap", "Random Time Gap", 'Chat Support', "Batching", "Caption", "Save Message Template", "Detailed Delivery report", "Stop Campaign", "Group Message"];
     const pricing_popup_premium_features = ["Schedule", 'Business Chat Link', 'Meet/Zoom Support', "Multiple Attachments", "Pause Campaign", "Download Unsaved Contacts"];
     removeAppBackdrop();
@@ -2189,7 +2188,7 @@ async function show_plan_pricing_popup(activePlan = 'basic') {
 
 
 async function show_pricing_popup() {
-    // WhatFlow CRM: Replaced Stripe-based pricing with Easypaisa/JazzCash payment
+    // WhatFlow CRM: Pricing popup
     removeAppBackdrop();
     closeAllPopups();
 
@@ -2398,7 +2397,7 @@ async function multipleAccountButton() {
 
 // for basic button always take the user to the pricing page
 async function basicButton(pricing_link, basicPrice, basicConvertedPrice, showPrice, convertToSpan) {
-    // WhatFlow CRM: Always use span-based approach (no Stripe links)
+    // WhatFlow CRM: Basic plan button
     var acctNum = (typeof WHATFLOW_CONFIG !== 'undefined') ? WHATFLOW_CONFIG.PAYMENT_ACCOUNT_NUMBER : '03269580417';
     return `<span class="popup-btn pricing-white-btn CtaBtn show-basic-popup" style="font-weight:bold;">
         Buy Basic
@@ -2411,7 +2410,7 @@ async function basicButton(pricing_link, basicPrice, basicConvertedPrice, showPr
 // 2.) else take the user to the pricing popup i.e. 
 // for the premium_expired reminder popup and buy_premium_popop if the user is trying to use premium feature
 function annualExpired(plan_type) {
-    // WhatFlow CRM: Replaced Stripe link with payment instructions
+    // WhatFlow CRM: Annual renewal button
     var acctNum = (typeof WHATFLOW_CONFIG !== 'undefined') ? WHATFLOW_CONFIG.PAYMENT_ACCOUNT_NUMBER : '03269580417';
     var supportLink = (typeof WHATFLOW_CONFIG !== 'undefined') ? WHATFLOW_CONFIG.SUPPORT_WHATSAPP_LINK : 'https://wa.me/923269580417';
     const renewButton = `
@@ -2428,7 +2427,7 @@ function annualExpired(plan_type) {
 
 
 async function advanceButton(pricing_link, advancePrice, advanceConvertedPrice, popup_name, showPrice, convertToSpan) {
-    // WhatFlow CRM: Always use span-based approach (no Stripe links)
+    // WhatFlow CRM: Advance plan button
     if (popup_name == 'free_trial_start' || popup_name == 'free_trial_reminder' || popup_name == 'free_trial_expired' || popup_name == 'advance_promo_activated' || popup_name == 'advance_promo_reminder') {
         btn = getFreeTrialButtonHtml();
         return btn;

@@ -1797,11 +1797,14 @@ function getMessage() {
         window.close();
     });
     
-    $('#request_chat_premium').click(function () {
-        sendMessageToBackground({ type: 'help' });
-        trackButtonClick('chat_support');
-        window.close();
-    });
+    var $requestChatPremium = $('#request_chat_premium');
+    if ($requestChatPremium.length) {
+        $requestChatPremium.click(function () {
+            sendMessageToBackground({ type: 'help' });
+            trackButtonClick('chat_support');
+            window.close();
+        });
+    }
    
     $('#chat_link').click(function () {
         sendMessageToBackground({ type: 'chat_link' });
@@ -2061,7 +2064,9 @@ function getMessage() {
         chrome.tabs.create({ url: chrome.runtime.getURL('blog.html') });
         trackButtonClick('open_blogs');
     });
-    $("#buy_premium_popup").click(function () {
+    var $buyPremiumPopup = $("#buy_premium_popup");
+    if ($buyPremiumPopup.length) {
+        $buyPremiumPopup.click(function () {
         trackButtonClick('buy_premium_popup');
         console.log("here")
         if (RUNTIME_CONFIG.useOldPricingLinks){
@@ -2071,6 +2076,7 @@ function getMessage() {
             window.close();
         }
     });
+    }
     $("#time_gap").on("change", function (e) {
         var time_gap = document.querySelector("#time_gap").value;
         trackButtonClick('time_gap_chnaged');
@@ -2534,7 +2540,7 @@ async function basicButton(pricing_link = "", basicPrice = "", basicConvertedPri
 }
 
 function getAnnualButtonHtml() {
-    // WhatFlow CRM: Stripe payment removed - use Easypaisa/JazzCash
+    // WhatFlow CRM: Payment via Easypaisa/JazzCash
     return '';
 }
 

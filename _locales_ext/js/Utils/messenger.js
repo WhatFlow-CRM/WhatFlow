@@ -738,7 +738,7 @@ async function messanger_popup() {
         modal_content.appendChild(campaignButtons);
 
         if (!isPremiumFeatureAvailable()) {
-            // WhatFlow CRM: Payment via EasyPaisa/JazzCash (no Stripe)
+            // WhatFlow CRM: Payment via EasyPaisa/JazzCash
             let supportLink = (typeof WHATFLOW_CONFIG !== 'undefined') ? WHATFLOW_CONFIG.SUPPORT_WHATSAPP_LINK : 'https://wa.me/923269580417';
             let paymentNumber = (typeof WHATFLOW_CONFIG !== 'undefined') ? WHATFLOW_CONFIG.PAYMENT_ACCOUNT_NUMBER : '03269580417';
             let paymentTitle = (typeof WHATFLOW_CONFIG !== 'undefined') ? WHATFLOW_CONFIG.PAYMENT_ACCOUNT_TITLE : 'Irfan Ilahee Munir';
