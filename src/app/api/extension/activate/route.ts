@@ -116,9 +116,8 @@ export async function POST(request: NextRequest) {
     }, { status: 200, headers: corsHeaders });
   } catch (error) {
     console.error('Error activating key:', error);
-    const errMsg = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { success: false, error: 'Service temporarily unavailable. Please try again later.', debug: errMsg },
+      { success: false, error: 'Service temporarily unavailable. Please try again later.' },
       { status: 200, headers: corsHeaders }
     );
   }
