@@ -36,8 +36,8 @@ export async function POST(request: NextRequest) {
     }
 
     if (key.status !== 'unused') {
-      const statusMsg = key.status === 'active' 
-        ? 'This key has already been used and is active on another number.' 
+      const statusMsg = key.status === 'active'
+        ? 'This key has already been used and is active on another number.'
         : `This key has been ${key.status} and cannot be reused.`;
       return NextResponse.json(
         { success: false, error: statusMsg },
@@ -45,16 +45,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Find existing user (if any)
-    const existingUser = await db.user.findUnique({
-      where: { whatsappNumber },
-    });
-
     const now = new Date();
     const expiresAt = new Date(now);
     expiresAt.setDate(expiresAt.getDate() + key.durationDays);
 
-    // 3. Create or update user
+    // 2. Find existing user (if any) — to get previous plan type
+    let previousPlanType: string | null = null;
+    try {
+      const existingUser = await db.user.findUnique({
+        where: { whatsappNumber },
+      });
+      if (existingUser) {
+        previousPlanType = existingUser.planType;
+      }
+    } catch { /* no existing user, that's fine */ }
+
+    // 3. Clear any old key linked to this number (to avoid unique constraint violation on linkedNumber)
+    try {
+      await db.activationKey.updateMany({
+        where: { linkedNumber: whatsappNumber },
+        data: { linkedNumber: null },
+      });
+    } catch { /* no old keys, fine */ }
+
+    // 4. Clear old currentKeyId on user if exists (to avoid unique constraint violation)
+    try {
+      await db.user.updateMany({
+        where: { currentKeyId: { not: null } },
+        data: { currentKeyId: null },
+      }).catch(() => {});
+    } catch { /* ignore */ }
+
+    // 5. Create or update user — safe upsert
     const user = await db.user.upsert({
       where: { whatsappNumber },
       create: {
@@ -66,7 +88,7 @@ export async function POST(request: NextRequest) {
         expiresAt,
       },
       update: {
-        lastPlanType: existingUser ? existingUser.planType : null,
+        lastPlanType: previousPlanType,
         planType: key.planType,
         isActive: true,
         currentKeyId: key.id,
@@ -75,7 +97,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // 4. Update activation key
+    // 6. Update activation key
     await db.activationKey.update({
       where: { id: key.id },
       data: {
@@ -86,24 +108,29 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // 5. Get plan details
-    const plan = await db.plan.findUnique({
-      where: { planType: key.planType },
-    });
+    // 7. Get plan details
+    let plan = null;
+    try {
+      plan = await db.plan.findUnique({
+        where: { planType: key.planType },
+      });
+    } catch { /* plan lookup failed, use defaults */ }
 
-    // 6. Create ActivityLog
-    await db.activityLog.create({
-      data: {
-        userId: user.id,
-        action: 'key_activated',
-        details: JSON.stringify({
-          activationKey: key.key,
-          planType: key.planType,
-          durationDays: key.durationDays,
-        }),
-        ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
-      },
-    });
+    // 8. Create ActivityLog (non-critical — don't fail if this breaks)
+    try {
+      await db.activityLog.create({
+        data: {
+          userId: user.id,
+          action: 'key_activated',
+          details: JSON.stringify({
+            activationKey: key.key,
+            planType: key.planType,
+            durationDays: key.durationDays,
+          }),
+          ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
+        },
+      });
+    } catch { /* activity log is non-critical */ }
 
     return NextResponse.json({
       success: true,
@@ -116,8 +143,9 @@ export async function POST(request: NextRequest) {
     }, { status: 200, headers: corsHeaders });
   } catch (error) {
     console.error('Error activating key:', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { success: false, error: 'Service temporarily unavailable. Please try again later.' },
+      { success: false, error: 'Activation failed: ' + errMsg },
       { status: 200, headers: corsHeaders }
     );
   }
