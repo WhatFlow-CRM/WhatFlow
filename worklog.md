@@ -145,3 +145,42 @@ Stage Summary:
 - Admin keys listing endpoint now works correctly
 - New keys generated from admin dashboard work immediately in extension
 - Commits: e03a4e0, 4a516db, 52f8db8, 90ef23c
+
+---
+Task ID: 6
+Agent: Main Agent
+Task: Comprehensive project review and professional fix
+
+Work Log:
+- Conducted full audit of 22 API routes, database schema (8 models), extension files (13 JS, 6 CSS, 6 locales), admin dashboard (2,261 lines)
+- Identified 15+ issues across the codebase
+
+CRITICAL FIXES:
+1. activate/route.ts: Fixed data corruption bug — was clearing ALL users' currentKeyId on every activation. Now only clears the specific activating user's reference.
+2. payments/route.ts: Fixed userId storing raw phone number instead of user cuid. Fixed currency default NGN→PKR.
+3. admin/config/route.ts: Fixed fallback siteName 'WhatsApp Flow'→'WhatFlow CRM', currency 'INR'→'PKR'
+
+API FIXES:
+4. admin/features/route.ts: PUT handler now supports creating NEW features with displayName (was returning 404)
+5. cleanup/route.ts: Removed hardcoded KNOWN_TEST_KEYS array. Now uses pattern-based detection only.
+
+ADMIN UI FIXES:
+6. page.tsx: handleAddFeature now sends displayName to API
+7. page.tsx: FEATURE_LIST updated to camelCase matching database (was snake_case)
+8. page.tsx: Removed unused STATUS_COLORS constant
+9. page.tsx: Removed dead Premium case from getPlanBadgeColor
+10. page.tsx: Added formatPhoneNumber() for consistent +{number} display across keys/users tables
+
+DATABASE CLEANUP:
+- Ran cleanup: 0 dummy keys found (already clean from previous session)
+- Ran repair: fixed 1 user-key linkage (923269580417 → Advance)
+
+FULL FLOW VERIFICATION ON PRODUCTION:
+- Generate key from admin → ✅ Works
+- Activate key in extension → ✅ Works (Advance, 90d, 5000 msgs/day)
+- Existing user NOT affected → ✅ Verified (critical fix working)
+- Status endpoint → ✅ Returns correct plan/features
+- Config endpoint → ✅ Returns correct site name/currency
+- All users active with correct plans
+
+Commit: a5b4df7 deployed to Vercel production
