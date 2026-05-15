@@ -87,3 +87,33 @@ Stage Summary:
 - Test keys available: WF-BASIC-TEST-0001-KEY1 through WF-BASIC-TEST-0003-KEY3, WF-ADVANCE-TEST-001-KEY1, WF-ADVANCE-TEST-002-KEY2
 - CORS headers added for Chrome extension cross-origin requests
 - Vercel deployment: https://what-flow.vercel.app (production, verified working)
+
+---
+Task ID: 4
+Agent: Main Agent
+Task: Fix activation key created from admin dashboard not working in extension
+
+Work Log:
+- Tested full flow: generate key from admin API → activate in extension → check status
+- Found production activation endpoint was throwing 503 "Service temporarily unavailable" error
+- Root cause: Database unique constraint conflicts when re-activating users
+  - `currentKeyId` on User has @unique constraint — old key id needed clearing
+  - `linkedNumber` on ActivationKey has @unique constraint — old key's linkedNumber needed clearing
+  - ActivityLog creation could also fail and crash the entire activation
+- Rewrote `/api/extension/activate/route.ts` to be bulletproof:
+  - Step 1: Clear old keys linked to the same number (updateMany → set linkedNumber to null)
+  - Step 2: Clear old currentKeyId references (updateMany → set to null)
+  - Step 3: Safe upsert user with previous plan tracking
+  - Step 4: Update activation key status
+  - Step 5: Wrapped plan lookup and activity log creation in try/catch (non-critical)
+  - Step 6: Error handler now returns actual error message for debugging
+- Tested end-to-end on Vercel production:
+  - Generate key → Activate new user → Success (Advance plan, 21/21 features)
+  - Generate key → Upgrade existing user (Basic → Advance) → Success (lastPlanType tracked)
+  - All operations return HTTP 200 with clear success/error messages
+
+Stage Summary:
+- Commit 81de9e1 deployed to Vercel production
+- Full activation flow verified: create key → copy key → paste in extension → activate → plan upgrades
+- No more "Service temporarily unavailable" errors
+- Unique constraint conflicts handled gracefully
