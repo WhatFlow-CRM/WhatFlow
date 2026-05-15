@@ -1,14 +1,23 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
-// Dummy key patterns
-const DUMMY_KEY_PATTERNS = ['TEST', '0000', '0001', '0002', '0003', 'AAAA', 'BBBB', 'CCCC', 'DDDD', 'FAKE', 'DEMO'];
+// Specific test keys created during development/testing — to be permanently removed
+const KNOWN_TEST_KEYS = [
+  'WF-J7LZ-HLX8-HHTY-6ND9',
+  'WF-NE2X-ADVN-C9D5',
+  'WF-PERM-ADVAN-G7H1',
+  'WF-YB9S-N9PE-ZZW2-8ZZT',
+  'WF-DEMO-KEY4-YOU1',
+  'WF-NE2X-BASIC-A7K3',
+];
 
-// Dummy phone number patterns (not real users)
+// Dummy key name patterns
+const DUMMY_KEY_PATTERNS = ['TEST', '0000', 'DEMO'];
+
+// Dummy phone number patterns
 const DUMMY_NUMBER_PATTERNS = [
   '9230000000', '9231111111', '9232222222', '9233333333', '9234444444',
   '9235555555', '9236666666', '9237777777', '9238888888', '9239999999',
-  'test', 'dummy', '0000000000',
 ];
 
 export async function POST() {
@@ -21,15 +30,14 @@ export async function POST() {
     const keptKeys: string[] = [];
 
     for (const k of allKeys) {
+      const isKnownTest = KNOWN_TEST_KEYS.includes(k.key);
       const isSeed = k.createdBy === 'seed';
-      const isDummyKey = DUMMY_KEY_PATTERNS.some(p => k.key.toUpperCase().includes(p));
-
-      // Check if linked to a dummy number
+      const hasDummyPattern = DUMMY_KEY_PATTERNS.some(p => k.key.toUpperCase().includes(p));
       const isDummyLinked = k.linkedNumber && DUMMY_NUMBER_PATTERNS.some(
-        p => k.linkedNumber!.toLowerCase().includes(p.toLowerCase())
+        p => k.linkedNumber!.includes(p)
       );
 
-      if (isSeed || isDummyKey || isDummyLinked) {
+      if (isKnownTest || isSeed || hasDummyPattern || isDummyLinked) {
         dummyKeyIds.push(k.id);
       } else {
         keptKeys.push(`${k.key} (${k.status}, linked: ${k.linkedNumber || 'none'})`);
@@ -37,23 +45,39 @@ export async function POST() {
     }
 
     if (dummyKeyIds.length === 0) {
+      const users = await db.user.findMany({ orderBy: { createdAt: 'desc' } });
+      const keys = await db.activationKey.findMany({ orderBy: { createdAt: 'desc' } });
       return NextResponse.json({
         success: true,
-        message: 'No dummy keys found — database is clean',
+        message: 'Database is clean — no dummy keys found',
         removedKeys: 0,
         removedUsers: 0,
-        keptKeys,
+        keptKeys: keys.map(k => `${k.key} (${k.status}, linked: ${k.linkedNumber || 'none'})`),
+        keptUsers: users.map(u => `${u.whatsappNumber} (${u.planType}, active: ${u.isActive})`),
       });
     }
 
-    // 1. Unlink users referencing dummy keys
+    // 1. Unlink users referencing dummy keys → reset to FreeTrial
     const usersWithDummyKeys = await db.user.findMany({
       where: { currentKeyId: { in: dummyKeyIds } },
     });
     for (const user of usersWithDummyKeys) {
+      // Check if this user has another real key they can use
+      const otherKey = await db.activationKey.findFirst({
+        where: {
+          linkedNumber: user.whatsappNumber,
+          id: { notIn: dummyKeyIds },
+          status: 'active',
+        },
+      });
       await db.user.update({
         where: { id: user.id },
-        data: { currentKeyId: null, planType: 'FreeTrial', isActive: false },
+        data: {
+          currentKeyId: otherKey ? otherKey.id : null,
+          ...(otherKey
+            ? { planType: otherKey.planType, isActive: true }
+            : { planType: 'FreeTrial', isActive: false }),
+        },
       });
     }
 
@@ -78,11 +102,12 @@ export async function POST() {
       } catch {}
     }
 
-    // 4. Clean orphaned keys (linked to deleted users)
+    // 4. Clean orphaned keys (linked to deleted users → reset to unused)
+    let orphanedReset = 0;
     const remainingKeys = await db.activationKey.findMany({
+      where: { linkedNumber: { not: null } },
       select: { id: true, linkedNumber: true },
     });
-    let orphanedRemoved = 0;
     for (const k of remainingKeys) {
       if (!k.linkedNumber) continue;
       const userExists = await db.user.findUnique({ where: { whatsappNumber: k.linkedNumber } });
@@ -91,20 +116,20 @@ export async function POST() {
           where: { id: k.id },
           data: { linkedNumber: null, status: 'unused' },
         });
-        orphanedRemoved++;
+        orphanedReset++;
       }
     }
 
-    // Final count of real keys
+    // Final state
     const finalKeys = await db.activationKey.findMany({ orderBy: { createdAt: 'desc' } });
     const finalUsers = await db.user.findMany({ orderBy: { createdAt: 'desc' } });
 
     return NextResponse.json({
       success: true,
-      message: `Cleaned ${result.count} dummy key(s), ${dummyUsersRemoved} dummy user(s), ${orphanedRemoved} orphaned key(s)`,
+      message: `Cleaned ${result.count} dummy key(s), ${dummyUsersRemoved} dummy user(s), ${orphanedReset} orphaned key(s) reset`,
       removedKeys: result.count,
       removedUsers: dummyUsersRemoved,
-      orphanedKeysReset: orphanedRemoved,
+      orphanedKeysReset: orphanedReset,
       keptKeys: finalKeys.map(k => `${k.key} (${k.status}, linked: ${k.linkedNumber || 'none'})`),
       keptUsers: finalUsers.map(u => `${u.whatsappNumber} (${u.planType}, active: ${u.isActive})`),
     });
