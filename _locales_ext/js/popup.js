@@ -2710,7 +2710,7 @@ async function showBuyPremiumButtons() {
         '<div style="padding:8px 4px;">' +
         '<div style="display:flex;flex-direction:column;gap:8px;">' + planCardsHtml + '</div>' +
         '<div style="margin-top:10px;text-align:center;">' +
-        '<a href="javascript:void(0)" data-wf-action="show-activation-key" style="color:#25D366;font-size:11px;text-decoration:none;font-weight:600;border-bottom:1px dashed #25D36640;padding-bottom:1px;transition:color 0.2s;">&#128273; Have an activation key? Click here</a>' +
+        '<span data-wf-action="show-activation-key" style="color:#25D366;font-size:11px;cursor:pointer;font-weight:600;border-bottom:1px dashed #25D36640;padding-bottom:1px;transition:color 0.2s;">&#128273; Have an activation key? Click here</span>' +
         '</div>' +
         '<div style="margin-top:12px;padding:10px;background:#111;border-radius:8px;border:1px solid #25D36630;text-align:center;">' +
         '<p style="color:#aaa;font-size:10px;margin-bottom:6px;">Need Help?</p>' +
