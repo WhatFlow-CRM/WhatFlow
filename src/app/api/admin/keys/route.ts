@@ -24,9 +24,6 @@ export async function GET(request: NextRequest) {
       db.activationKey.findMany({
         where: Object.keys(where).length > 0 ? where : undefined,
         orderBy: { createdAt: 'desc' },
-        include: {
-          _count: { select: { linkedNumber: true } },
-        },
       }),
       db.activationKey.count({
         where: Object.keys(where).length > 0 ? where : undefined,
