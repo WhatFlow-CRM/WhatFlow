@@ -17,6 +17,7 @@ var WHATFLOW_CONFIG = {
     PAYMENT_ACCOUNT_NUMBER: "03269580417",
     PAYMENT_ACCOUNT_TITLE: "Irfan Ilahee Munir",
     PAYMENT_CURRENCY: "PKR",
+    PAYMENT_CURRENCY_SYMBOL: "Rs.",
 
     // API Endpoints (relative to ADMIN_SERVER_URL)
     API: {

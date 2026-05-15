@@ -8,6 +8,13 @@ export async function GET() {
       orderBy: { monthlyPrice: 'asc' },
     });
 
+    // Get system config for currency
+    const currencyConfig = await db.systemConfig.findUnique({
+      where: { key: 'currency' },
+    });
+    const currency = currencyConfig?.value || 'PKR';
+    const currencySymbol = currency === 'USD' ? '$' : 'Rs.';
+
     const formattedPlans = await Promise.all(
       plans.map(async (plan) => {
         const planFeatures = await db.planFeatureAccess.findMany({
@@ -21,6 +28,8 @@ export async function GET() {
           monthlyPrice: plan.monthlyPrice,
           annualPrice: plan.annualPrice,
           dailyMessageLimit: plan.dailyMessageLimit,
+          currency,
+          currencySymbol,
           features: planFeatures.map((pf) => ({
             key: pf.featureKey,
             name: pf.feature.displayName,
@@ -39,7 +48,9 @@ export async function GET() {
         displayName: 'Basic Plan',
         monthlyPrice: 500,
         annualPrice: 5000,
-        dailyMessageLimit: 100,
+        dailyMessageLimit: 2000,
+        currency: 'PKR',
+        currencySymbol: 'Rs.',
         features: [],
       },
       {
@@ -47,7 +58,9 @@ export async function GET() {
         displayName: 'Advance Plan',
         monthlyPrice: 1000,
         annualPrice: 10000,
-        dailyMessageLimit: 500,
+        dailyMessageLimit: 5000,
+        currency: 'PKR',
+        currencySymbol: 'Rs.',
         features: [],
       },
     ]);

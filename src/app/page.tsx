@@ -31,6 +31,7 @@ import {
   Clock,
   MoreHorizontal,
   X,
+  Globe,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -240,10 +241,19 @@ function formatDateTime(dateStr: string | null): string {
   });
 }
 
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-IN', {
+function formatCurrency(amount: number, currency?: string): string {
+  const curr = currency || 'PKR';
+  if (curr === 'USD') {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  }
+  return new Intl.NumberFormat('en-PK', {
     style: 'currency',
-    currency: 'INR',
+    currency: 'PKR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount);
@@ -349,6 +359,16 @@ export default function AdminDashboard() {
   const [activityFilter, setActivityFilter] = useState('all');
   const [activityPage, setActivityPage] = useState(1);
   const activityPerPage = 20;
+
+  // Settings state
+  const [currency, setCurrency] = useState('PKR');
+  const [currencyLoading, setCurrencyLoading] = useState(false);
+  const [systemConfig, setSystemConfig] = useState<Record<string, string>>({});
+  const [configLoading, setConfigLoading] = useState(false);
+  const [editPaymentAccount, setEditPaymentAccount] = useState('');
+  const [editPaymentTitle, setEditPaymentTitle] = useState('');
+  const [editSupportPhone, setEditSupportPhone] = useState('');
+  const [configSaving, setConfigSaving] = useState<string | null>(null);
 
   // Key detail dialog
   const [selectedKey, setSelectedKey] = useState<ActivationKey | null>(null);
@@ -460,6 +480,54 @@ export default function AdminDashboard() {
     }
   }, [activityFilter, activityPage]);
 
+  const fetchConfig = useCallback(async () => {
+    setConfigLoading(true);
+    try {
+      const res = await fetch('/api/admin/config');
+      if (!res.ok) throw new Error('Failed to fetch config');
+      const data = await res.json();
+      const configMap: Record<string, string> = {};
+      if (Array.isArray(data)) {
+        data.forEach((item: { key: string; value: string }) => {
+          configMap[item.key] = item.value;
+        });
+      } else if (data && typeof data === 'object') {
+        Object.entries(data).forEach(([k, v]) => {
+          configMap[k] = String(v);
+        });
+      }
+      setSystemConfig(configMap);
+      if (configMap.currency === 'USD' || configMap.currency === 'PKR') {
+        setCurrency(configMap.currency);
+      }
+      setEditPaymentAccount(configMap.payment_account_number || '');
+      setEditPaymentTitle(configMap.payment_account_title || '');
+      setEditSupportPhone(configMap.support_phone || '');
+    } catch {
+      toast.error('Failed to load system config');
+    } finally {
+      setConfigLoading(false);
+    }
+  }, []);
+
+  const handleSaveConfig = useCallback(async (key: string, value: string) => {
+    setConfigSaving(key);
+    try {
+      const res = await fetch('/api/admin/config', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, value }),
+      });
+      if (!res.ok) throw new Error('Failed to save config');
+      toast.success('Config saved successfully');
+      fetchConfig();
+    } catch {
+      toast.error('Failed to save config');
+    } finally {
+      setConfigSaving(null);
+    }
+  }, [fetchConfig]);
+
   // ─── Effects ───────────────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -485,6 +553,10 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (activeTab === 'activity') fetchActivity();
   }, [activeTab, fetchActivity]);
+
+  useEffect(() => {
+    if (activeTab === 'settings') fetchConfig();
+  }, [activeTab, fetchConfig]);
 
   // Reset page when filters change
   useEffect(() => { setKeysPage(1); }, [keysFilter, keysSearch]);
@@ -748,6 +820,7 @@ export default function AdminDashboard() {
                     if (activeTab === 'plans') fetchPlans();
                     if (activeTab === 'features') fetchFeatures();
                     if (activeTab === 'activity') fetchActivity();
+                    if (activeTab === 'settings') fetchConfig();
                     toast.success('Data refreshed');
                   }}
                 >
@@ -772,6 +845,7 @@ export default function AdminDashboard() {
                 { value: 'plans', label: 'Plans', icon: CreditCard },
                 { value: 'features', label: 'Features', icon: Settings2 },
                 { value: 'activity', label: 'Activity', icon: Activity },
+                { value: 'settings', label: 'Settings', icon: Globe },
               ].map((tab) => (
                 <TabsTrigger
                   key={tab.value}
@@ -818,7 +892,7 @@ export default function AdminDashboard() {
                   },
                   {
                     title: 'Revenue',
-                    value: stats ? formatCurrency(stats.revenue) : '—',
+                    value: stats ? formatCurrency(stats.revenue, currency) : '—',
                     sub: `${stats?.pendingPayments ?? 0} pending payments`,
                     icon: DollarSign,
                     color: 'from-rose-500 to-pink-500',
@@ -1980,6 +2054,188 @@ export default function AdminDashboard() {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            {/* ═══════════════════ SETTINGS TAB ══════════════════════════════ */}
+            <TabsContent value="settings" className="space-y-6">
+              {configLoading ? (
+                <div className="space-y-6">
+                  {[...Array(3)].map((_, i) => (
+                    <Skeleton key={i} className="h-[300px] rounded-xl" />
+                  ))}
+                </div>
+              ) : (
+                <>
+                  {/* Currency Settings Card */}
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                          <DollarSign className="w-4 h-4 text-emerald-600" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-base font-semibold">Currency Settings</CardTitle>
+                          <CardDescription>Choose the display currency for prices</CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-xs font-medium text-muted-foreground">Display Currency</Label>
+                          <Select
+                            value={currency}
+                            onValueChange={async (val) => {
+                              setCurrency(val);
+                              setCurrencyLoading(true);
+                              await handleSaveConfig('currency', val);
+                              setCurrencyLoading(false);
+                            }}
+                          >
+                            <SelectTrigger className="w-full">
+                              {currencyLoading ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <SelectValue />
+                              )}
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="PKR">PKR (Rs.)</SelectItem>
+                              <SelectItem value="USD">USD ($)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-xs font-medium text-muted-foreground">Current Selection</Label>
+                          <div className="flex items-center gap-2 h-10 px-3 rounded-md border bg-zinc-50">
+                            <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                              {currency === 'PKR' ? '🇵🇰 PKR (Rs.)' : '🇺🇸 USD ($)'}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <Globe className="w-3 h-3" />
+                        Changes affect how prices are displayed in the extension
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Payment Info Card */}
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+                          <CreditCard className="w-4 h-4 text-amber-600" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-base font-semibold">Payment Information</CardTitle>
+                          <CardDescription>Payment details shown to customers</CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {/* Payment Account Number */}
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-medium text-muted-foreground">Payment Account Number</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            value={editPaymentAccount}
+                            onChange={(e) => setEditPaymentAccount(e.target.value)}
+                            placeholder="e.g., 1234-5678-9012"
+                          />
+                          <Button
+                            size="sm"
+                            onClick={() => handleSaveConfig('payment_account_number', editPaymentAccount)}
+                            disabled={configSaving === 'payment_account_number'}
+                            className="bg-[#25D366] hover:bg-[#1da851] text-white shrink-0"
+                          >
+                            {configSaving === 'payment_account_number' ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              'Save'
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Payment Account Title */}
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-medium text-muted-foreground">Payment Account Title</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            value={editPaymentTitle}
+                            onChange={(e) => setEditPaymentTitle(e.target.value)}
+                            placeholder="e.g., WhatFlow CRM"
+                          />
+                          <Button
+                            size="sm"
+                            onClick={() => handleSaveConfig('payment_account_title', editPaymentTitle)}
+                            disabled={configSaving === 'payment_account_title'}
+                            className="bg-[#25D366] hover:bg-[#1da851] text-white shrink-0"
+                          >
+                            {configSaving === 'payment_account_title' ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              'Save'
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Support Phone */}
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-medium text-muted-foreground">Support Phone</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            value={editSupportPhone}
+                            onChange={(e) => setEditSupportPhone(e.target.value)}
+                            placeholder="e.g., +92 300 1234567"
+                          />
+                          <Button
+                            size="sm"
+                            onClick={() => handleSaveConfig('support_phone', editSupportPhone)}
+                            disabled={configSaving === 'support_phone'}
+                            className="bg-[#25D366] hover:bg-[#1da851] text-white shrink-0"
+                          >
+                            {configSaving === 'support_phone' ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              'Save'
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Admin API Config Card */}
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-sky-50 flex items-center justify-center">
+                          <Zap className="w-4 h-4 text-sky-600" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-base font-semibold">Admin API Configuration</CardTitle>
+                          <CardDescription>Server configuration settings</CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-medium text-muted-foreground">ADMIN_SERVER_URL</Label>
+                        <div className="flex items-center gap-2 h-10 px-3 rounded-md border bg-zinc-50">
+                          <code className="text-sm font-mono text-zinc-700 truncate">
+                            {systemConfig.ADMIN_SERVER_URL || process.env.NEXT_PUBLIC_ADMIN_SERVER_URL || 'Not configured'}
+                          </code>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Read-only — configured via environment variables</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
             </TabsContent>
           </Tabs>
         </main>

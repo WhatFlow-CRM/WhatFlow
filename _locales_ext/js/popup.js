@@ -2687,7 +2687,8 @@ async function showBuyPremiumButtons() {
 
     // Build plan cards
     var planCardsHtml = _availablePlans.map(function(p, idx) {
-        var price = p.monthlyPrice > 0 ? 'Rs. ' + p.monthlyPrice.toLocaleString() : 'Free';
+        var _currSym = p.currencySymbol || ((typeof WHATFLOW_CONFIG !== 'undefined') ? WHATFLOW_CONFIG.PAYMENT_CURRENCY_SYMBOL : 'Rs. ');
+        var price = p.monthlyPrice > 0 ? _currSym + ' ' + p.monthlyPrice.toLocaleString() : 'Free';
         var features = [];
         try { features = JSON.parse(p.features || '[]'); } catch(e) { features = []; }
         var featureList = features.slice(0, 5).map(function(f) {
@@ -2732,7 +2733,8 @@ function selectPlanForPayment(planType) {
     var buy_premium_section = document.querySelector("#buy_premium_block");
     if (!buy_premium_section) return;
 
-    var html = '<div class="premium_features_divider"><p style="z-index:1000;color:#fff;margin:0;padding-left:0;">Upgrade: ' + selectedPlan.displayName + ' (Rs. ' + price.toLocaleString() + '/mo)</p></div>' +
+    var _currSym2 = selectedPlan.currencySymbol || ((typeof WHATFLOW_CONFIG !== 'undefined') ? WHATFLOW_CONFIG.PAYMENT_CURRENCY_SYMBOL : 'Rs. ');
+    var html = '<div class="premium_features_divider"><p style="z-index:1000;color:#fff;margin:0;padding-left:0;">Upgrade: ' + selectedPlan.displayName + ' (' + _currSym2 + ' ' + price.toLocaleString() + '/mo)</p></div>' +
         '<div style="padding:8px 4px;">' +
         '<button onclick="showBuyPremiumButtons()" style="background:none;border:1px solid #555;color:#aaa;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px;margin-bottom:10px;">&#8592; Back to Plans</button>' +
 
@@ -2881,7 +2883,7 @@ function handlePaymentProofSubmit() {
         paymentMethod: _selectedPaymentMethod,
         transactionId: txnId || null,
         amount: amount,
-        currency: 'PKR',
+        currency: (typeof WHATFLOW_CONFIG !== 'undefined') ? WHATFLOW_CONFIG.PAYMENT_CURRENCY : 'PKR',
         planType: planType,
         planDuration: 'Monthly',
         proofImage: _paymentProofBase64,
@@ -2922,7 +2924,8 @@ function checkMyPaymentStatus() {
         _lastPaymentStatus = payment.status;
         var statusColor = payment.status === 'approved' ? '#4ADE80' : payment.status === 'rejected' ? '#f44' : '#ff9800';
         var statusText = payment.status.charAt(0).toUpperCase() + payment.status.slice(1);
-        var methodText = payment.paymentMethod + ' | Rs. ' + payment.amount.toLocaleString() + ' | ' + payment.planType;
+        var _currSym3 = payment.currencySymbol || ((typeof WHATFLOW_CONFIG !== 'undefined') ? WHATFLOW_CONFIG.PAYMENT_CURRENCY_SYMBOL : 'Rs. ');
+        var methodText = payment.paymentMethod + ' | ' + _currSym3 + ' ' + payment.amount.toLocaleString() + ' | ' + payment.planType;
         var dateText = new Date(payment.createdAt).toLocaleString();
         var noteHtml = payment.adminNote ? '<p style="margin-top:4px;font-size:10px;color:#aaa;">Admin Note: ' + payment.adminNote + '</p>' : '';
 

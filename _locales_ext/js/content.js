@@ -1605,7 +1605,7 @@ function trackGenericEvent(event, data) {
     // Filters null and undefined values
     let combinedData = { ...location, ...context, ...data };
     let eventData = Object.fromEntries(
-        Object.entries(combinedData).filter(([key, value]) => value != null || value != undefined) 
+        Object.entries(combinedData).filter(([key, value]) => value != null && value != undefined) 
     );
     GoogleAnalytics.trackEvent(event, { label, ...eventData });
 }
