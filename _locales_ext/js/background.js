@@ -125,10 +125,76 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 bcdinit();
 
+// ===== WHATFLOW CRM: Periodic activation status sync =====
+// Syncs plan/activation status from server every 30 minutes
+var WHATFLOW_ADMIN_URL = (typeof WHATFLOW_CONFIG !== 'undefined') ? WHATFLOW_CONFIG.ADMIN_SERVER_URL : "https://what-flow.vercel.app";
+
+function syncActivationStatus() {
+    chrome.storage.local.get(['my_number'], function(result) {
+        if (!result.my_number || !WHATFLOW_ADMIN_URL) return;
+        
+        var statusUrl = WHATFLOW_ADMIN_URL + ((typeof WHATFLOW_CONFIG !== 'undefined') ? WHATFLOW_CONFIG.API.EXTENSION_STATUS : "/api/extension/status") + "?whatsappNumber=" + encodeURIComponent(result.my_number);
+        
+        try {
+            fetch(statusUrl)
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data && data.planType) {
+                        var updates = {
+                            plan_type: data.planType,
+                            last_sync: Date.now()
+                        };
+                        if (data.isActive !== undefined) updates.plan_is_active = data.isActive;
+                        if (data.expiresAt) updates.plan_expires_at = data.expiresAt;
+                        if (data.dailyMessageLimit) updates.daily_message_limit = data.dailyMessageLimit;
+                        if (data.features) updates.plan_features = JSON.stringify(data.features);
+                        
+                        chrome.storage.local.set(updates);
+                    }
+                })
+                .catch(function(err) {
+                    console.log("Activation status sync failed:", err);
+                });
+        } catch(e) {
+            // Silently fail
+        }
+    });
+}
+
+// Sync every 30 minutes (1800000 ms)
+setInterval(syncActivationStatus, 1800000);
+
+// Also sync on startup after a short delay
+setTimeout(syncActivationStatus, 5000);
+
 // Handle messages from content script to open popup
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.type === 'open_popup') {
         chrome.action.openPopup();
+        sendResponse({success: true});
+    }
+    // Handle activation status request from popup
+    if (request.type === 'get_activation_status') {
+        chrome.storage.local.get(['my_number'], function(result) {
+            if (!result.my_number || !WHATFLOW_ADMIN_URL) {
+                sendResponse({error: 'No number or server not configured'});
+                return;
+            }
+            var statusUrl = WHATFLOW_ADMIN_URL + ((typeof WHATFLOW_CONFIG !== 'undefined') ? WHATFLOW_CONFIG.API.EXTENSION_STATUS : "/api/extension/status") + "?whatsappNumber=" + encodeURIComponent(result.my_number);
+            fetch(statusUrl)
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    sendResponse(data);
+                })
+                .catch(function(err) {
+                    sendResponse({error: 'Failed to fetch status'});
+                });
+        });
+        return true; // Keep message channel open for async response
+    }
+    // Handle manual activation sync trigger
+    if (request.type === 'sync_activation_now') {
+        syncActivationStatus();
         sendResponse({success: true});
     }
 });
