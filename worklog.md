@@ -117,3 +117,31 @@ Stage Summary:
 - Full activation flow verified: create key → copy key → paste in extension → activate → plan upgrades
 - No more "Service temporarily unavailable" errors
 - Unique constraint conflicts handled gracefully
+
+---
+Task ID: 5
+Agent: Main Agent
+Task: Clean dummy/test keys from database, keep only user-created keys
+
+Work Log:
+- Created `/api/admin/keys/cleanup` endpoint to identify and remove dummy keys
+  - Detects keys with patterns: TEST, DEMO, 0000, etc.
+  - Detects keys linked to dummy numbers (9230000000, 9239999999, etc.)
+  - Maintains a KNOWN_TEST_KEYS list for specific keys created during dev
+  - Cleans orphaned keys (linked to deleted users) by resetting to unused
+  - Unlinks users from dummy keys, resets to FreeTrial
+- Created `/api/admin/keys/repair` endpoint to fix broken user-key linkages
+  - Matches active keys to their linked users
+  - Creates missing users, fixes wrong planType/isActive/currentKeyId
+  - Resets users with stale key references
+- Fixed `/api/admin/keys` listing endpoint (removed broken `_count` on non-relation field)
+- Removed seed key generation from `/api/seed` route (no more auto-generated test keys)
+- Ran cleanup on production: removed 13 dummy keys, 4 dummy users
+- Ran repair: fixed user 923269580417 → Advance plan (re-linked to their key WF-J7JC-QR55-Y5GP-JB9A)
+
+Stage Summary:
+- Database is clean: only 4 real user-created keys remain
+- 1 real user (923269580417) properly linked to Advance plan
+- Admin keys listing endpoint now works correctly
+- New keys generated from admin dashboard work immediately in extension
+- Commits: e03a4e0, 4a516db, 52f8db8, 90ef23c
