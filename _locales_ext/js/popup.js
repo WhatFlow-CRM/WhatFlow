@@ -6192,8 +6192,8 @@ function handleActivationKeySubmit() {
                 }, 2000);
                 
             } else {
-                // API returned an error
-                var errorMsg = data.message || 'Activation failed. Please try again.';
+                // API returned an error — check both data.error and data.message
+                var errorMsg = data.error || data.message || 'Activation failed. Please try again.';
                 showActivationStatus('error', errorMsg);
                 submitBtn.disabled = false;
                 submitBtn.innerText = 'Activate';

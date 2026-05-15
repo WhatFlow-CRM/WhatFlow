@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: corsHeaders });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -8,8 +18,8 @@ export async function POST(request: NextRequest) {
 
     if (!whatsappNumber || !activationKey) {
       return NextResponse.json(
-        { error: 'whatsappNumber and activationKey are required' },
-        { status: 400 }
+        { success: false, error: 'WhatsApp number and activation key are required' },
+        { status: 200, headers: corsHeaders }
       );
     }
 
@@ -19,13 +29,19 @@ export async function POST(request: NextRequest) {
     });
 
     if (!key) {
-      return NextResponse.json({ error: 'Invalid activation key' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: 'Invalid activation key. Please check and try again.' },
+        { status: 200, headers: corsHeaders }
+      );
     }
 
     if (key.status !== 'unused') {
+      const statusMsg = key.status === 'active' 
+        ? 'This key has already been used and is active on another number.' 
+        : `This key has been ${key.status} and cannot be reused.`;
       return NextResponse.json(
-        { error: `Activation key is already ${key.status}` },
-        { status: 400 }
+        { success: false, error: statusMsg },
+        { status: 200, headers: corsHeaders }
       );
     }
 
@@ -97,9 +113,12 @@ export async function POST(request: NextRequest) {
       dailyMessageLimit: plan?.dailyMessageLimit ?? 500,
       expiresAt,
       durationDays: key.durationDays,
-    });
+    }, { status: 200, headers: corsHeaders });
   } catch (error) {
     console.error('Error activating key:', error);
-    return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
+    return NextResponse.json(
+      { success: false, error: 'Service temporarily unavailable. Please try again later.' },
+      { status: 200, headers: corsHeaders }
+    );
   }
 }

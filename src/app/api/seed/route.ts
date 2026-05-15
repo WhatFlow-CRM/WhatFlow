@@ -84,6 +84,27 @@ export async function POST() {
       });
     }
 
+    // Generate activation keys (5 Basic + 5 Advance)
+    const sampleKeys = [
+      { key: 'WF-BASIC-TEST-0001-KEY1', planType: 'Basic', durationDays: 30 },
+      { key: 'WF-BASIC-TEST-0002-KEY2', planType: 'Basic', durationDays: 30 },
+      { key: 'WF-BASIC-TEST-0003-KEY3', planType: 'Basic', durationDays: 30 },
+      { key: 'WF-ADVANCE-TEST-001-KEY1', planType: 'Advance', durationDays: 30 },
+      { key: 'WF-ADVANCE-TEST-002-KEY2', planType: 'Advance', durationDays: 30 },
+    ];
+
+    let keysCreated = 0;
+    for (const k of sampleKeys) {
+      try {
+        await db.activationKey.upsert({
+          where: { key: k.key },
+          update: {},
+          create: { ...k, status: 'unused', createdBy: 'seed' },
+        });
+        keysCreated++;
+      } catch { /* key already exists, skip */ }
+    }
+
     // System config
     const configs = [
       { key: 'payment_account_number', value: '03269580417' },
@@ -104,6 +125,7 @@ export async function POST() {
       message: 'Database seeded successfully',
       plans: DEFAULT_PLANS.length,
       features: DEFAULT_FEATURES.length,
+      activationKeys: keysCreated,
     });
   } catch (error) {
     console.error('Error seeding database:', error);
