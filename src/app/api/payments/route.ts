@@ -33,15 +33,16 @@ export async function POST(request: NextRequest) {
     });
 
     // Create activity log for payment proof submission (legacy compat)
+    const user = await db.user.findUnique({ where: { whatsappNumber } });
     await db.activityLog.create({
       data: {
-        userId: whatsappNumber,
+        userId: user?.id || whatsappNumber,
         action: 'payment_submitted',
         details: JSON.stringify({
           paymentMethod,
           transactionId: transactionId || null,
           amount: parseFloat(amount),
-          currency: currency || 'NGN',
+          currency: currency || 'PKR',
           planType,
           planDuration: planDuration || 'Monthly',
           proofImage,

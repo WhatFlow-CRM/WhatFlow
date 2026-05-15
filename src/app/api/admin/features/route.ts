@@ -47,28 +47,36 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { featureKey, isActive } = body;
+    const { featureKey, displayName, isActive } = body;
 
     if (!featureKey) {
       return NextResponse.json({ error: 'featureKey is required' }, { status: 400 });
     }
 
-    const feature = await db.feature.findUnique({
+    const existingFeature = await db.feature.findUnique({
       where: { featureKey },
     });
 
-    if (!feature) {
-      return NextResponse.json({ error: 'Feature not found' }, { status: 404 });
+    let feature;
+    if (existingFeature) {
+      // Update existing
+      feature = await db.feature.update({
+        where: { featureKey },
+        data: {
+          ...(isActive !== undefined && { isActive }),
+          ...(displayName && { displayName }),
+        },
+      });
+    } else if (displayName) {
+      // Create new (only if displayName provided)
+      feature = await db.feature.create({
+        data: { featureKey, displayName, isActive: isActive !== undefined ? isActive : true },
+      });
+    } else {
+      return NextResponse.json({ error: 'Feature not found. Provide displayName to create it.' }, { status: 404 });
     }
 
-    const updatedFeature = await db.feature.update({
-      where: { featureKey },
-      data: {
-        ...(isActive !== undefined && { isActive }),
-      },
-    });
-
-    return NextResponse.json({ feature: updatedFeature });
+    return NextResponse.json({ feature });
   } catch (error) {
     console.error('Error updating feature:', error);
     return NextResponse.json({ error: 'Database not configured' }, { status: 503 });

@@ -1,18 +1,8 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
-// Specific test keys created during development/testing — to be permanently removed
-const KNOWN_TEST_KEYS = [
-  'WF-J7LZ-HLX8-HHTY-6ND9',
-  'WF-NE2X-ADVN-C9D5',
-  'WF-PERM-ADVAN-G7H1',
-  'WF-YB9S-N9PE-ZZW2-8ZZT',
-  'WF-DEMO-KEY4-YOU1',
-  'WF-NE2X-BASIC-A7K3',
-];
-
 // Dummy key name patterns
-const DUMMY_KEY_PATTERNS = ['TEST', '0000', 'DEMO'];
+const DUMMY_KEY_PATTERNS = ['TEST', '0000', 'DEMO', 'FAKE', 'AAAA', 'BBBB', 'CCCC', 'DDDD'];
 
 // Dummy phone number patterns
 const DUMMY_NUMBER_PATTERNS = [
@@ -30,14 +20,13 @@ export async function POST() {
     const keptKeys: string[] = [];
 
     for (const k of allKeys) {
-      const isKnownTest = KNOWN_TEST_KEYS.includes(k.key);
       const isSeed = k.createdBy === 'seed';
       const hasDummyPattern = DUMMY_KEY_PATTERNS.some(p => k.key.toUpperCase().includes(p));
       const isDummyLinked = k.linkedNumber && DUMMY_NUMBER_PATTERNS.some(
         p => k.linkedNumber!.includes(p)
       );
 
-      if (isKnownTest || isSeed || hasDummyPattern || isDummyLinked) {
+      if (isSeed || hasDummyPattern || isDummyLinked) {
         dummyKeyIds.push(k.id);
       } else {
         keptKeys.push(`${k.key} (${k.status}, linked: ${k.linkedNumber || 'none'})`);

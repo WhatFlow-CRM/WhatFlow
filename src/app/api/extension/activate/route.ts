@@ -68,12 +68,14 @@ export async function POST(request: NextRequest) {
       });
     } catch { /* no old keys, fine */ }
 
-    // 4. Clear old currentKeyId on user if exists (to avoid unique constraint violation)
+    // 4. Clear old currentKeyId for THIS user only (to avoid unique constraint violation)
     try {
-      await db.user.updateMany({
-        where: { currentKeyId: { not: null } },
-        data: { currentKeyId: null },
-      }).catch(() => {});
+      if (previousPlanType !== null) {
+        await db.user.update({
+          where: { whatsappNumber },
+          data: { currentKeyId: null },
+        });
+      }
     } catch { /* ignore */ }
 
     // 5. Create or update user — safe upsert

@@ -16,10 +16,10 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching system config:', error);
     return NextResponse.json({
-      siteName: 'WhatsApp Flow',
+      siteName: 'WhatFlow CRM',
       siteDescription: 'WhatsApp Business Management Platform',
       supportEmail: '',
-      currency: 'INR',
+      currency: 'PKR',
       defaultPlanDuration: 'Monthly',
     });
   }

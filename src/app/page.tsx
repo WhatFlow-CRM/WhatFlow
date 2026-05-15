@@ -166,55 +166,48 @@ const FEATURE_LIST = [
   'broadcasting',
   'attachments',
   'customization',
-  'quick_replies',
+  'quickReplies',
   'translation',
-  'time_gap_control',
-  'random_gap',
+  'timeGapControl',
+  'randomGap',
   'batching',
   'caption',
   'templates',
-  'delivery_report',
+  'deliveryReport',
   'blur',
   'schedule',
-  'business_chat_link',
-  'export_contacts',
-  'multiple_attachments',
-  'stop_campaign',
-  'group_export',
-  'priority_support',
-  'verify_numbers',
-  'chat_support',
+  'businessChatLink',
+  'exportContacts',
+  'multipleAttachments',
+  'stopCampaign',
+  'groupExport',
+  'prioritySupport',
+  'verifyNumbers',
+  'chatSupport',
 ];
 
 const FEATURE_DISPLAY_NAMES: Record<string, string> = {
   broadcasting: 'Broadcasting',
   attachments: 'Attachments',
   customization: 'Customization',
-  quick_replies: 'Quick Replies',
+  quickReplies: 'Quick Replies',
   translation: 'Translation',
-  time_gap_control: 'Time Gap Control',
-  random_gap: 'Random Gap',
+  timeGapControl: 'Time Gap Control',
+  randomGap: 'Random Gap',
   batching: 'Batching',
   caption: 'Caption',
   templates: 'Templates',
-  delivery_report: 'Delivery Report',
+  deliveryReport: 'Delivery Report',
   blur: 'Blur',
   schedule: 'Schedule',
-  business_chat_link: 'Business Chat Link',
-  export_contacts: 'Export Contacts',
-  multiple_attachments: 'Multiple Attachments',
-  stop_campaign: 'Stop Campaign',
-  group_export: 'Group Export',
-  priority_support: 'Priority Support',
-  verify_numbers: 'Verify Numbers',
-  chat_support: 'Chat Support',
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  unused: 'bg-zinc-100 text-zinc-700 border-zinc-200',
-  active: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  expired: 'bg-amber-50 text-amber-700 border-amber-200',
-  deactivated: 'bg-red-50 text-red-700 border-red-200',
+  businessChatLink: 'Business Chat Link',
+  exportContacts: 'Export Contacts',
+  multipleAttachments: 'Multiple Attachments',
+  stopCampaign: 'Stop Campaign',
+  groupExport: 'Group Export',
+  prioritySupport: 'Priority Support',
+  verifyNumbers: 'Verify Numbers',
+  chatSupport: 'Chat Support',
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -259,6 +252,17 @@ function formatCurrency(amount: number, currency?: string): string {
   }).format(amount);
 }
 
+function formatPhoneNumber(num: string | null): string {
+  if (!num) return '—';
+  // If already has + prefix, keep it
+  if (num.startsWith('+')) return num;
+  // Format as +{country code} {number}
+  if (num.length >= 10) {
+    return '+' + num;
+  }
+  return num;
+}
+
 function truncateKey(key: string): string {
   if (key.length <= 15) return key;
   return key.substring(0, 10) + '...' + key.substring(key.length - 6);
@@ -277,7 +281,6 @@ function getStatusBadge(status: string) {
 function getPlanBadgeColor(planType: string): string {
   switch (planType) {
     case 'Advance':
-    case 'Premium':
       return 'bg-emerald-100 text-emerald-700 border-emerald-300';
     case 'Basic':
       return 'bg-sky-100 text-sky-700 border-sky-300';
@@ -767,7 +770,7 @@ export default function AdminDashboard() {
       const res = await fetch('/api/admin/features', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ featureKey: newFeatureKey.trim(), isActive: true }),
+        body: JSON.stringify({ featureKey: newFeatureKey.trim(), displayName: newFeatureName.trim(), isActive: true }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -1231,7 +1234,7 @@ export default function AdminDashboard() {
                                   {k.linkedNumber ? (
                                     <span className="flex items-center gap-1">
                                       <Phone className="w-3 h-3 text-muted-foreground" />
-                                      {k.linkedNumber}
+                                      {formatPhoneNumber(k.linkedNumber)}
                                     </span>
                                   ) : (
                                     <span className="text-muted-foreground">—</span>
@@ -1330,7 +1333,7 @@ export default function AdminDashboard() {
                           { label: 'Plan', value: selectedKey.planType },
                           { label: 'Duration', value: `${selectedKey.durationDays} days` },
                           { label: 'Status', value: selectedKey.status, badge: true },
-                          { label: 'Linked Number', value: selectedKey.linkedNumber || '—' },
+                          { label: 'Linked Number', value: formatPhoneNumber(selectedKey.linkedNumber) },
                           { label: 'Created', value: formatDateTime(selectedKey.createdAt) },
                           { label: 'Activated At', value: formatDateTime(selectedKey.activatedAt) },
                           { label: 'Expires At', value: formatDateTime(selectedKey.expiresAt) },
@@ -1458,7 +1461,7 @@ export default function AdminDashboard() {
                                 <TableCell className="text-xs">
                                   <span className="flex items-center gap-1">
                                     <Phone className="w-3 h-3 text-muted-foreground" />
-                                    {u.whatsappNumber}
+                                    {formatPhoneNumber(u.whatsappNumber)}
                                   </span>
                                 </TableCell>
                                 <TableCell>
@@ -1573,7 +1576,7 @@ export default function AdminDashboard() {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-xs text-muted-foreground">WhatsApp</span>
-                          <span className="text-sm font-medium">{selectedUser.whatsappNumber}</span>
+                          <span className="text-sm font-medium">{formatPhoneNumber(selectedUser.whatsappNumber)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-xs text-muted-foreground">Email</span>
@@ -1897,11 +1900,11 @@ export default function AdminDashboard() {
                     <div className="space-y-1.5">
                       <Label>Feature Key</Label>
                       <Input
-                        placeholder="e.g., new_feature"
+                        placeholder="e.g., newFeature"
                         value={newFeatureKey}
-                        onChange={(e) => setNewFeatureKey(e.target.value.replace(/\s/g, '_').toLowerCase())}
+                        onChange={(e) => setNewFeatureKey(e.target.value.replace(/\s+/g, '').replace(/^[A-Z]/, (c) => c.toLowerCase()))}
                       />
-                      <p className="text-xs text-muted-foreground">Use snake_case, e.g. quick_replies</p>
+                      <p className="text-xs text-muted-foreground">Use camelCase, e.g. quickReplies</p>
                     </div>
                     <div className="space-y-1.5">
                       <Label>Display Name</Label>
