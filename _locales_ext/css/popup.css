@@ -3419,6 +3419,52 @@ input[type="date"]::webkit-calendar-picker-indicator {
     margin-left: 0px;
 }
 
+/* WhatFlow CRM - Manifest V3 CSP hover effects (replaces inline onmouseover/onmouseout) */
+.wf-upgrade-btn:hover {
+    opacity: 0.85;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.wf-upgrade-btn:active {
+    transform: translateY(0);
+    opacity: 0.95;
+}
+.wf-activation-link:hover {
+    color: #4ADE80 !important;
+}
+.wf-back-btn:hover {
+    border-color: #888 !important;
+    color: #fff !important;
+}
+.wf-pay-method:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.wf-submit-proof-btn:hover {
+    opacity: 0.9;
+}
+.wf-check-status-btn:hover {
+    background: #333 !important;
+    color: #fff !important;
+    border-color: #888 !important;
+}
+#activation_submit_btn:hover {
+    opacity: 0.9;
+}
+#activation_close_btn:hover {
+    color: #fff !important;
+}
+#activation_close_link:hover {
+    border-color: #666 !important;
+    color: #fff !important;
+}
+.wf-activation-key-input:focus {
+    border-color: #25D366 !important;
+}
+.wf-activation-key-input {
+    border-color: #333;
+}
+
 .lds-ring,
 .lds-ring div {
   box-sizing: border-box;

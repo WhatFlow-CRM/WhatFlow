@@ -2685,7 +2685,7 @@ async function showBuyPremiumButtons() {
         ];
     }
 
-    // Build plan cards
+    // Build plan cards - using data-wf-action instead of onclick (Manifest V3 CSP)
     var planCardsHtml = _availablePlans.map(function(p, idx) {
         var _currSym = p.currencySymbol || ((typeof WHATFLOW_CONFIG !== 'undefined') ? WHATFLOW_CONFIG.PAYMENT_CURRENCY_SYMBOL : 'Rs. ');
         var price = p.monthlyPrice > 0 ? _currSym + ' ' + p.monthlyPrice.toLocaleString() : 'Free';
@@ -2703,7 +2703,7 @@ async function showBuyPremiumButtons() {
             '<span style="color:' + borderColor + ';font-weight:bold;font-size:14px;">' + price + '<span style="font-size:10px;color:#888;">/mo</span></span>' +
             '</div>' +
             '<ul style="list-style:none;padding:0;margin:0;">' + featureList + '</ul>' +
-            '<button onclick="selectPlanForPayment(\'' + p.planType + '\')" style="width:100%;margin-top:8px;padding:7px;border:none;border-radius:6px;background:' + borderColor + ';color:#fff;font-weight:bold;font-size:11px;cursor:pointer;">Upgrade to ' + p.displayName + '</button>' +
+            '<button data-wf-action="select-plan" data-plan="' + p.planType + '" class="wf-upgrade-btn" style="width:100%;margin-top:8px;padding:7px;border:none;border-radius:6px;background:' + borderColor + ';color:#fff;font-weight:bold;font-size:11px;cursor:pointer;">Upgrade to ' + p.displayName + '</button>' +
             '</div>';
     }).join('');
 
@@ -2711,7 +2711,7 @@ async function showBuyPremiumButtons() {
         '<div style="padding:8px 4px;">' +
         '<div style="display:flex;flex-direction:column;gap:8px;">' + planCardsHtml + '</div>' +
         '<div style="margin-top:10px;text-align:center;">' +
-        '<a href="javascript:void(0)" onclick="showActivationKeyEntry()" style="color:#25D366;font-size:11px;text-decoration:none;font-weight:600;border-bottom:1px dashed #25D36640;padding-bottom:1px;transition:color 0.2s;" onmouseover="this.style.color=\'#4ADE80\'" onmouseout="this.style.color=\'#25D366\'">&#128273; Have an activation key? Click here</a>' +
+        '<a href="javascript:void(0)" data-wf-action="show-activation-key" class="wf-activation-link" style="color:#25D366;font-size:11px;text-decoration:none;font-weight:600;border-bottom:1px dashed #25D36640;padding-bottom:1px;transition:color 0.2s;">&#128273; Have an activation key? Click here</a>' +
         '</div>' +
         '<div style="margin-top:12px;padding:10px;background:#111;border-radius:8px;border:1px solid #25D36630;text-align:center;">' +
         '<p style="color:#aaa;font-size:10px;margin-bottom:6px;">Need Help?</p>' +
@@ -2736,14 +2736,14 @@ function selectPlanForPayment(planType) {
     var _currSym2 = selectedPlan.currencySymbol || ((typeof WHATFLOW_CONFIG !== 'undefined') ? WHATFLOW_CONFIG.PAYMENT_CURRENCY_SYMBOL : 'Rs. ');
     var html = '<div class="premium_features_divider"><p style="z-index:1000;color:#fff;margin:0;padding-left:0;">Upgrade: ' + selectedPlan.displayName + ' (' + _currSym2 + ' ' + price.toLocaleString() + '/mo)</p></div>' +
         '<div style="padding:8px 4px;">' +
-        '<button onclick="showBuyPremiumButtons()" style="background:none;border:1px solid #555;color:#aaa;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px;margin-bottom:10px;">&#8592; Back to Plans</button>' +
+        '<button data-wf-action="back-to-plans" class="wf-back-btn" style="background:none;border:1px solid #555;color:#aaa;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px;margin-bottom:10px;">&#8592; Back to Plans</button>' +
 
         '<p style="color:#ccc;font-size:11px;margin-bottom:8px;font-weight:600;">Step 1: Select Payment Method</p>' +
         '<div style="display:flex;gap:8px;margin-bottom:14px;">' +
-        '<div id="pay_method_easypaisa" onclick="selectPaymentMethod(\'Easypaisa\')" style="flex:1;cursor:pointer;border:2px solid #333;border-radius:10px;padding:12px 8px;text-align:center;background:#1a1a1a;transition:all 0.2s;">' +
+        '<div id="pay_method_easypaisa" data-wf-action="select-method" data-method="Easypaisa" class="wf-pay-method" style="flex:1;cursor:pointer;border:2px solid #333;border-radius:10px;padding:12px 8px;text-align:center;background:#1a1a1a;transition:all 0.2s;">' +
         '<div style="width:44px;height:44px;margin:0 auto 6px;background:linear-gradient(135deg,#00A651,#008C44);border-radius:10px;display:flex;align-items:center;justify-content:center;"><span style="color:white;font-weight:bold;font-size:18px;">E</span></div>' +
         '<span style="color:#fff;font-size:12px;font-weight:700;">Easypaisa</span></div>' +
-        '<div id="pay_method_jazzcash" onclick="selectPaymentMethod(\'JazzCash\')" style="flex:1;cursor:pointer;border:2px solid #333;border-radius:10px;padding:12px 8px;text-align:center;background:#1a1a1a;transition:all 0.2s;">' +
+        '<div id="pay_method_jazzcash" data-wf-action="select-method" data-method="JazzCash" class="wf-pay-method" style="flex:1;cursor:pointer;border:2px solid #333;border-radius:10px;padding:12px 8px;text-align:center;background:#1a1a1a;transition:all 0.2s;">' +
         '<div style="width:44px;height:44px;margin:0 auto 6px;background:linear-gradient(135deg,#E4002B,#C40024);border-radius:10px;display:flex;align-items:center;justify-content:center;"><span style="color:white;font-weight:bold;font-size:18px;">J</span></div>' +
         '<span style="color:#fff;font-size:12px;font-weight:700;">JazzCash</span></div>' +
         '</div>' +
@@ -2763,13 +2763,13 @@ function selectPlanForPayment(planType) {
         '</label>' +
         '<div style="margin-top:8px;"><input type="text" id="payment_txn_id" placeholder="Transaction ID (optional)" style="width:100%;padding:8px;border-radius:6px;border:1px solid #444;background:#222;color:#fff;font-size:12px;box-sizing:border-box;" /></div>' +
         '<input type="hidden" id="wf_selected_plan_type" value="' + planType + '" />' +
-        '<button id="submit_payment_proof" onclick="handlePaymentProofSubmit()" style="width:100%;margin-top:10px;padding:11px;border:none;border-radius:8px;background:linear-gradient(135deg,#259C46,#1a7a35);color:white;font-weight:bold;font-size:13px;cursor:pointer;transition:opacity 0.2s;" onmouseover="this.style.opacity=\'0.9\'" onmouseout="this.style.opacity=\'1\'">' +
+        '<button id="submit_payment_proof" data-wf-action="submit-proof" class="wf-submit-proof-btn" style="width:100%;margin-top:10px;padding:11px;border:none;border-radius:8px;background:linear-gradient(135deg,#259C46,#1a7a35);color:white;font-weight:bold;font-size:13px;cursor:pointer;transition:opacity 0.2s;">' +
         'Submit Payment Proof</button>' +
         '<p id="payment_submit_status" style="color:#888;font-size:10px;text-align:center;margin-top:6px;display:none;"></p>' +
         '</div></div>' +
 
         '<div id="wf_check_status_section" style="margin-top:10px;">' +
-        '<button onclick="checkMyPaymentStatus()" style="width:100%;padding:8px;border:1px solid #555;border-radius:6px;background:#222;color:#ccc;font-size:11px;cursor:pointer;">&#128269; Check My Payment Status</button>' +
+        '<button data-wf-action="check-status" class="wf-check-status-btn" style="width:100%;padding:8px;border:1px solid #555;border-radius:6px;background:#222;color:#ccc;font-size:11px;cursor:pointer;">&#128269; Check My Payment Status</button>' +
         '<div id="wf_payment_status_result" style="margin-top:6px;display:none;"></div>' +
         '</div>' +
         '</div>';
@@ -6055,6 +6055,99 @@ async function translateAPI(text, sourceLanguage = 'en', targetLanguage = curren
         return filter(text);
     }
 }
+// ===== EVENT DELEGATION FOR MANIFEST V3 CSP =====
+// All onclick handlers are replaced with data-wf-action attributes.
+// This single listener handles all button clicks via event delegation.
+(function setupWfEventDelegation() {
+    document.addEventListener('click', function(e) {
+        // Find closest element with data-wf-action
+        var target = e.target.closest('[data-wf-action]');
+        if (!target) return;
+
+        var action = target.getAttribute('data-wf-action');
+
+        switch(action) {
+            case 'select-plan':
+                var plan = target.getAttribute('data-plan');
+                if (plan) selectPlanForPayment(plan);
+                e.preventDefault();
+                break;
+            case 'show-activation-key':
+                showActivationKeyEntry();
+                e.preventDefault();
+                break;
+            case 'back-to-plans':
+                showBuyPremiumButtons();
+                e.preventDefault();
+                break;
+            case 'select-method':
+                var method = target.getAttribute('data-method');
+                if (method) selectPaymentMethod(method);
+                e.preventDefault();
+                break;
+            case 'submit-proof':
+                handlePaymentProofSubmit();
+                e.preventDefault();
+                break;
+            case 'check-status':
+                checkMyPaymentStatus();
+                e.preventDefault();
+                break;
+        }
+    });
+})();
+
+// Bind static activation key modal buttons (popup.html)
+(function setupActivationModalListeners() {
+    function bindWhenReady() {
+        var overlay = document.getElementById('activation_key_overlay');
+        var closeBtn = document.getElementById('activation_close_btn');
+        var submitBtn = document.getElementById('activation_submit_btn');
+        var closeLink = document.getElementById('activation_close_link');
+        var keyInput = document.getElementById('activation_key_input');
+
+        if (!overlay && !closeBtn && !submitBtn) {
+            setTimeout(bindWhenReady, 100);
+            return;
+        }
+
+        if (overlay) {
+            overlay.addEventListener('click', function() {
+                hideActivationKeyEntry();
+            });
+        }
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                hideActivationKeyEntry();
+            });
+        }
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function() {
+                handleActivationKeySubmit();
+            });
+        }
+        if (closeLink) {
+            closeLink.addEventListener('click', function() {
+                hideActivationKeyEntry();
+            });
+        }
+        if (keyInput) {
+            keyInput.addEventListener('focus', function() {
+                this.style.borderColor = '#25D366';
+            });
+            keyInput.addEventListener('blur', function() {
+                this.style.borderColor = '#333';
+            });
+        }
+    }
+    // Run after DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bindWhenReady);
+    } else {
+        bindWhenReady();
+    }
+})();
+
 // ===== ACTIVATION KEY ENTRY (Phase 4) =====
 // Show the activation key entry modal
 function showActivationKeyEntry() {
