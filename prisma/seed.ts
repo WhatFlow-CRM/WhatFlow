@@ -82,6 +82,23 @@ async function seed() {
     });
   }
 
+  // Create sample activation keys
+  const sampleKeys = [
+    { key: 'WF-TEST-BASIC-0001', planType: 'Basic', durationDays: 30, status: 'unused', createdBy: 'system' },
+    { key: 'WF-TEST-BASIC-0002', planType: 'Basic', durationDays: 30, status: 'unused', createdBy: 'system' },
+    { key: 'WF-TEST-ADVAN-0001', planType: 'Advance', durationDays: 30, status: 'unused', createdBy: 'system' },
+    { key: 'WF-TEST-ADVAN-0002', planType: 'Advance', durationDays: 30, status: 'unused', createdBy: 'system' },
+    { key: 'WF-DEMO-KEY4-YOU1', planType: 'Advance', durationDays: 90, status: 'unused', createdBy: 'system' },
+  ];
+
+  for (const ak of sampleKeys) {
+    const exists = await db.activationKey.findUnique({ where: { key: ak.key } });
+    if (!exists) {
+      await db.activationKey.create({ data: ak });
+      console.log(`  ActivationKey: ${ak.key} (${ak.planType}, ${ak.durationDays} days)`);
+    }
+  }
+
   // System config
   const configs = [
     { key: 'payment_account_number', value: '03269580417' },
