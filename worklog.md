@@ -112,3 +112,24 @@ Stage Summary:
 - ✅ content.js bug fix: null/undefined filter logic corrected
 - ✅ Vercel: Deployed at my-project-sooty-gamma-71.vercel.app
 - ✅ GitHub: Pushed to WhatFlow-CRM/WhatFlow (main)
+---
+Task ID: 1
+Agent: Main Agent
+Task: Fix non-clickable buttons in Chrome extension popup (Manifest V3 CSP issue)
+
+Work Log:
+- Analyzed user screenshot showing 3 non-working buttons: Upgrade to Basic, Upgrade to Advance, Have an activation key
+- Identified ROOT CAUSE: Manifest V3 Content Security Policy blocks all inline event handlers (onclick, onmouseover, onmouseout)
+- Replaced ALL inline onclick handlers in popup.js with data-wf-action attributes
+- Implemented event delegation handler (setupWfEventDelegation) that handles all button clicks
+- Fixed activation key modal in popup.html - removed onclick from 4 elements
+- Bound activation modal buttons via addEventListener (setupActivationModalListeners)
+- Added CSS :hover effects in popup.css to replace onmouseover/onmouseout
+- Verified zero remaining inline handlers in all extension files
+- Committed and pushed to GitHub (commit 236c7d6)
+
+Stage Summary:
+- Files changed: popup.js, popup.html, popup.css
+- Key pattern: data-wf-action attribute + event delegation replaces all inline onclick
+- All 3 reported non-working buttons should now work: Upgrade to Basic, Upgrade to Advance, Have an activation key
+
