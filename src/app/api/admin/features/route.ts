@@ -79,6 +79,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ feature });
   } catch (error) {
     console.error('Error updating feature:', error);
-    return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: 'Failed to update feature: ' + errMsg }, { status: 500 });
   }
 }

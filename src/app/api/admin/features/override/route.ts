@@ -60,6 +60,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ override });
   } catch (error) {
     console.error('Error setting feature override:', error);
-    return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: 'Failed to set feature override: ' + errMsg }, { status: 500 });
   }
 }

@@ -43,6 +43,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ access });
   } catch (error) {
     console.error('Error updating plan-feature access:', error);
-    return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: 'Failed to update plan-feature access: ' + errMsg }, { status: 500 });
   }
 }

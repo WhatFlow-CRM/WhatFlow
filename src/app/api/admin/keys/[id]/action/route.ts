@@ -81,6 +81,7 @@ export async function POST(
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
     console.error('Error performing key action:', error);
-    return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: 'Failed to perform key action: ' + errMsg }, { status: 500 });
   }
 }

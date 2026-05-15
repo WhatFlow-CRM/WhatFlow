@@ -77,6 +77,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ plan: updatedPlan });
   } catch (error) {
     console.error('Error updating plan:', error);
-    return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: 'Failed to update plan: ' + errMsg }, { status: 500 });
   }
 }

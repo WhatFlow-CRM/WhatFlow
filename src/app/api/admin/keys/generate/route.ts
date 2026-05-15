@@ -98,6 +98,7 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error('Error generating activation keys:', error);
-    return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: 'Failed to generate keys: ' + errMsg }, { status: 500 });
   }
 }

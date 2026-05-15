@@ -46,6 +46,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ config });
   } catch (error) {
     console.error('Error updating system config:', error);
-    return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: 'Failed to update config: ' + errMsg }, { status: 500 });
   }
 }
