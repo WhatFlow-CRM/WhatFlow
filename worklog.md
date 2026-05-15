@@ -88,3 +88,27 @@ Stage Summary:
 - ✅ All 21 API routes functional
 - ✅ Admin dashboard accessible publicly
 - ✅ Extension activation API endpoints working
+---
+Task ID: 4
+Agent: Main Agent
+Task: Add Rs./$ currency toggle + fix extension-admin connection + deploy
+
+Work Log:
+- Added Settings tab to admin dashboard with PKR/USD currency toggle
+- Currency saves to SystemConfig and affects all price displays
+- Updated /api/extension/plans to return currency + currencySymbol fields
+- Fixed popup.js: 3 hardcoded "Rs." references now use dynamic currency from API
+- Fixed popup.js: Payment proof submission uses configurable currency
+- Fixed content.js: Logical OR bug in null filter (changed to AND)
+- Added PAYMENT_CURRENCY_SYMBOL to WHATFLOW_CONFIG in data.js
+- Verified all API endpoints working with currency fields
+- Deployed to Vercel production (compiled successfully)
+- Pushed to GitHub (commit 52a4759)
+
+Stage Summary:
+- ✅ Admin Settings tab: Currency PKR/USD toggle, editable payment info, API config display
+- ✅ Extension plans API: Returns { currency: "PKR", currencySymbol: "Rs." }
+- ✅ Extension popup.js: Dynamic currency display from API
+- ✅ content.js bug fix: null/undefined filter logic corrected
+- ✅ Vercel: Deployed at my-project-sooty-gamma-71.vercel.app
+- ✅ GitHub: Pushed to WhatFlow-CRM/WhatFlow (main)
