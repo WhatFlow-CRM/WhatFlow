@@ -6081,8 +6081,8 @@ function showActivationKeyEntry() {
         submitBtn.style.opacity = '1';
     }
     
-    modal.style.display = 'flex';
-    
+    modal.style.display = 'block';
+
     // Auto-format key input (WF-XXXX-XXXX-XXXX-XXXX)
     if (keyInput && !keyInput._hasActivationListener) {
         keyInput._hasActivationListener = true;

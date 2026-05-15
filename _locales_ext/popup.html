@@ -965,10 +965,10 @@
     <!-- Hidden elements referenced by popup.js click handlers -->
     <div id="buy_premium_popup" style="display:none;"></div>
     <button id="request_chat_premium" style="display:none;"></button>
-        <!-- Activation Key Entry Modal -->
-        <div id="activation_key_modal" style="display:none; position:fixed; z-index:99999; height:100vh; width:100%; align-items:center; justify-content:center;">
-            <div class="popup_overlay" data-wf-action="hide-activation-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);"></div>
-            <div style="position:relative; z-index:100000; background:#111; border-radius:12px; padding:20px; width:320px; max-width:90%; border:1px solid #25D36630; box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+        <!-- Activation Key Entry Modal (matches popup overlay pattern used by add_number_popup etc.) -->
+        <div id="activation_key_modal" style="display:none;">
+            <div style="background-color:rgba(0,0,0,0.75); height:2848px; width:1440px; position:fixed; left:0px; top:0px; z-index:100001;" data-wf-action="hide-activation-modal"></div>
+            <div style="position:fixed; z-index:100002; background:#111; border-radius:12px; padding:20px; width:320px; top:140px; left:50%; margin-left:-160px; border:1px solid #25D36630; box-shadow:0 8px 32px rgba(0,0,0,0.5);">
                 <!-- Close button -->
                 <button data-wf-action="hide-activation-modal" style="position:absolute; top:10px; right:12px; background:none; border:none; color:#888; font-size:18px; cursor:pointer; padding:0; line-height:1;" title="Close">&times;</button>
 
