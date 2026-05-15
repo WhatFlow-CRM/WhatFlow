@@ -64,3 +64,26 @@ Stage Summary:
 - API routes: All return meaningful data even without database connection
 - Site deployed at https://what-flow.vercel.app (200 OK, APIs respond)
 - Full activation flow tested locally: generate key → activate → check status → check features
+
+---
+Task ID: 3
+Agent: Main Agent
+Task: Fix "Activation Failed" error when inserting activation key
+
+Work Log:
+- Diagnosed root cause: API returned HTTP 404/400 for errors, but frontend only showed success for HTTP 200
+- Diagnosed secondary bug: Frontend read `data.message` but API sent `data.error` — always showed generic "Activation failed"
+- Fixed API route `/api/extension/activate/route.ts`: All responses now return HTTP 200 with `{success: true/false, error/message: "..."}`
+- Added CORS headers (Access-Control-Allow-Origin: *) and OPTIONS handler for preflight requests
+- Fixed frontend `popup.js`: Error handler now reads `data.error || data.message` instead of only `data.message`
+- Added 5 test activation keys to seed route (3 Basic + 2 Advance, 30-day duration)
+- Seeded production database via `/api/seed` on Vercel
+- Tested end-to-end: valid key → success, reused key → "already used" error, invalid key → "Invalid activation key" error
+- Deployed to Vercel production (commit 6ce4ea3 → be71db9)
+- Pushed all changes to GitHub (main branch)
+
+Stage Summary:
+- Activation flow now works correctly: HTTP 200 + descriptive error messages
+- Test keys available: WF-BASIC-TEST-0001-KEY1 through WF-BASIC-TEST-0003-KEY3, WF-ADVANCE-TEST-001-KEY1, WF-ADVANCE-TEST-002-KEY2
+- CORS headers added for Chrome extension cross-origin requests
+- Vercel deployment: https://what-flow.vercel.app (production, verified working)
