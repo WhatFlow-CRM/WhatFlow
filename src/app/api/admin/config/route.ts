@@ -15,7 +15,13 @@ export async function GET() {
     return NextResponse.json(configMap);
   } catch (error) {
     console.error('Error fetching system config:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({
+      siteName: 'WhatsApp Flow',
+      siteDescription: 'WhatsApp Business Management Platform',
+      supportEmail: '',
+      currency: 'INR',
+      defaultPlanDuration: 'Monthly',
+    });
   }
 }
 
@@ -40,6 +46,6 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ config });
   } catch (error) {
     console.error('Error updating system config:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
   }
 }

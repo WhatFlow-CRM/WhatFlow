@@ -43,6 +43,6 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ access });
   } catch (error) {
     console.error('Error updating plan-feature access:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
   }
 }

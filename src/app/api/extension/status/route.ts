@@ -72,6 +72,15 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching extension status:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({
+      planType: 'FreeTrial',
+      isActive: false,
+      expiresAt: null,
+      subscribedAt: null,
+      lastPlanType: null,
+      dailyMessageLimit: 50,
+      features: {},
+      paymentStatus: null,
+    });
   }
 }

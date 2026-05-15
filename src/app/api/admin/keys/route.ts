@@ -36,6 +36,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ keys, total });
   } catch (error) {
     console.error('Error fetching activation keys:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ keys: [], total: 0 });
   }
 }

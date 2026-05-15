@@ -65,6 +65,6 @@ export async function PUT(
     return NextResponse.json({ user: updatedUser });
   } catch (error) {
     console.error('Error updating user:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
   }
 }

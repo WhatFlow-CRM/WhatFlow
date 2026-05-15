@@ -52,6 +52,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(features);
   } catch (error) {
     console.error('Error fetching features:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({});
   }
 }

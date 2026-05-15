@@ -29,11 +29,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Find or create user
+    // 2. Find existing user (if any)
+    const existingUser = await db.user.findUnique({
+      where: { whatsappNumber },
+    });
+
     const now = new Date();
     const expiresAt = new Date(now);
     expiresAt.setDate(expiresAt.getDate() + key.durationDays);
 
+    // 3. Create or update user
     const user = await db.user.upsert({
       where: { whatsappNumber },
       create: {
@@ -45,26 +50,16 @@ export async function POST(request: NextRequest) {
         expiresAt,
       },
       update: {
-        lastPlanType: { /* keep previous if exists */ },
+        lastPlanType: existingUser ? existingUser.planType : null,
+        planType: key.planType,
+        isActive: true,
+        currentKeyId: key.id,
+        activatedAt: now,
+        expiresAt,
       },
     });
 
-    // If user existed, update their fields
-    if (user) {
-      await db.user.update({
-        where: { id: user.id },
-        data: {
-          lastPlanType: user.planType,
-          planType: key.planType,
-          isActive: true,
-          currentKeyId: key.id,
-          activatedAt: now,
-          expiresAt,
-        },
-      });
-    }
-
-    // 3. Update activation key
+    // 4. Update activation key
     await db.activationKey.update({
       where: { id: key.id },
       data: {
@@ -75,12 +70,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // 4. Get plan details
+    // 5. Get plan details
     const plan = await db.plan.findUnique({
       where: { planType: key.planType },
     });
 
-    // 5. Create ActivityLog
+    // 6. Create ActivityLog
     await db.activityLog.create({
       data: {
         userId: user.id,
@@ -105,6 +100,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error activating key:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
   }
 }

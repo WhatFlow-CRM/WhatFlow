@@ -23,6 +23,7 @@ var WHATFLOW_CONFIG = {
         EXTENSION_STATUS: "/api/extension/status",
         EXTENSION_PLANS: "/api/extension/plans",
         EXTENSION_PAYMENT_STATUS: "/api/extension/payment-status",
+        EXTENSION_ACTIVATE: "/api/extension/activate",
         PAYMENTS: "/api/payments",
     },
 

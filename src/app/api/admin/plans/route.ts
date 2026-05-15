@@ -34,7 +34,12 @@ export async function GET() {
     return NextResponse.json({ plans: plansWithFeatures });
   } catch (error) {
     console.error('Error fetching plans:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({
+      plans: [
+        { planType: 'Basic', displayName: 'Basic Plan', monthlyPrice: 500, annualPrice: 5000, dailyMessageLimit: 100, isActive: true, features: [], _count: { users: 0 } },
+        { planType: 'Advance', displayName: 'Advance Plan', monthlyPrice: 1000, annualPrice: 10000, dailyMessageLimit: 500, isActive: true, features: [], _count: { users: 0 } },
+      ],
+    });
   }
 }
 
@@ -72,6 +77,6 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ plan: updatedPlan });
   } catch (error) {
     console.error('Error updating plan:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
   }
 }

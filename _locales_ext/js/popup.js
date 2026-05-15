@@ -2709,6 +2709,9 @@ async function showBuyPremiumButtons() {
     var html = '<div class="premium_features_divider"><p style="z-index:1000;color:#fff;margin:0;padding-left:0;">Choose a Plan:</p></div>' +
         '<div style="padding:8px 4px;">' +
         '<div style="display:flex;flex-direction:column;gap:8px;">' + planCardsHtml + '</div>' +
+        '<div style="margin-top:10px;text-align:center;">' +
+        '<a href="javascript:void(0)" onclick="showActivationKeyEntry()" style="color:#25D366;font-size:11px;text-decoration:none;font-weight:600;border-bottom:1px dashed #25D36640;padding-bottom:1px;transition:color 0.2s;" onmouseover="this.style.color=\'#4ADE80\'" onmouseout="this.style.color=\'#25D366\'">&#128273; Have an activation key? Click here</a>' +
+        '</div>' +
         '<div style="margin-top:12px;padding:10px;background:#111;border-radius:8px;border:1px solid #25D36630;text-align:center;">' +
         '<p style="color:#aaa;font-size:10px;margin-bottom:6px;">Need Help?</p>' +
         '<a href="' + ((typeof WHATFLOW_CONFIG !== 'undefined') ? WHATFLOW_CONFIG.SUPPORT_WHATSAPP_LINK : 'https://wa.me/923269580417') + '" target="_blank" style="color:#25D366;font-size:12px;font-weight:bold;text-decoration:none;">&#128172; WhatsApp Support: ' + ((typeof WHATFLOW_CONFIG !== 'undefined') ? WHATFLOW_CONFIG.SUPPORT_DISPLAY : '+92 3269580417') + '</a>' +
@@ -6048,4 +6051,195 @@ async function translateAPI(text, sourceLanguage = 'en', targetLanguage = curren
         trackError("translate_api_popupjs_error", e);
         return filter(text);
     }
+}
+// ===== ACTIVATION KEY ENTRY (Phase 4) =====
+// Show the activation key entry modal
+function showActivationKeyEntry() {
+    var modal = document.getElementById('activation_key_modal');
+    if (!modal) return;
+    
+    // Pre-fill WhatsApp number from my_number
+    var numberInput = document.getElementById('activation_whatsapp_number');
+    if (numberInput) {
+        numberInput.value = my_number || 'Not set';
+    }
+    
+    // Clear previous state
+    var keyInput = document.getElementById('activation_key_input');
+    if (keyInput) keyInput.value = '';
+    var statusArea = document.getElementById('activation_status_area');
+    if (statusArea) {
+        statusArea.style.display = 'none';
+        statusArea.innerHTML = '';
+    }
+    
+    // Reset submit button
+    var submitBtn = document.getElementById('activation_submit_btn');
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Activate';
+        submitBtn.style.opacity = '1';
+    }
+    
+    modal.style.display = 'flex';
+    
+    // Auto-format key input (WF-XXXX-XXXX-XXXX-XXXX)
+    if (keyInput && !keyInput._hasActivationListener) {
+        keyInput._hasActivationListener = true;
+        keyInput.addEventListener('input', function(e) {
+            var val = this.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+            var formatted = '';
+            for (var i = 0; i < val.length && i < 18; i++) {
+                if (i > 0 && (i === 2 || i === 6 || i === 10 || i === 14)) {
+                    formatted += '-';
+                }
+                formatted += val[i];
+            }
+            this.value = formatted;
+        });
+    }
+}
+
+// Hide the activation key entry modal
+function hideActivationKeyEntry() {
+    var modal = document.getElementById('activation_key_modal');
+    if (modal) modal.style.display = 'none';
+}
+
+// Handle activation key submission
+function handleActivationKeySubmit() {
+    if (!my_number) {
+        showActivationStatus('error', 'No WhatsApp number found. Please set your number first.');
+        return;
+    }
+    
+    var keyInput = document.getElementById('activation_key_input');
+    var submitBtn = document.getElementById('activation_submit_btn');
+    var statusArea = document.getElementById('activation_status_area');
+    
+    if (!keyInput) return;
+    
+    var activationKey = keyInput.value.trim().toUpperCase();
+    
+    // Validate key format: WF-XXXX-XXXX-XXXX-XXXX
+    var keyPattern = /^WF-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+    if (!keyPattern.test(activationKey)) {
+        showActivationStatus('error', 'Invalid key format. Use: WF-XXXX-XXXX-XXXX-XXXX');
+        keyInput.focus();
+        return;
+    }
+    
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerText = 'Activating...';
+    submitBtn.style.opacity = '0.6';
+    showActivationStatus('loading', '&#9203; Contacting server...');
+    
+    // POST to activation API
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", ADMIN_SERVER_URL + WHATFLOW_CONFIG.API.EXTENSION_ACTIVATE, true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.timeout = 15000;
+    
+    xhr.ontimeout = function() {
+        showActivationStatus('error', 'Request timed out. Please check your connection and try again.');
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Activate';
+        submitBtn.style.opacity = '1';
+    };
+    
+    xhr.onload = function() {
+        try {
+            var data = JSON.parse(xhr.responseText);
+            
+            if (xhr.status === 200 && data.success) {
+                // Success!
+                var planName = data.planType || 'Premium';
+                var displayName = data.displayName || planName;
+                var duration = data.durationDays ? data.durationDays + ' days' : '';
+                var expiryInfo = data.expiresAt ? ' | Expires: ' + new Date(data.expiresAt).toLocaleDateString() : '';
+                
+                showActivationStatus('success', '&#10003; Activated! Plan: <strong>' + displayName + '</strong>' + (duration ? ' (' + duration + ')' : '') + expiryInfo);
+                
+                submitBtn.innerText = 'Activated &#10003;';
+                submitBtn.style.background = '#1a7a35';
+                
+                // Update local plan variables
+                plan_type = data.planType || 'Premium';
+                if (data.planDuration) plan_duration = data.planDuration;
+                last_plan_type = plan_type;
+                
+                // Save to chrome storage
+                chrome.storage.local.set({
+                    plan_type: plan_type,
+                    plan_duration: plan_duration,
+                    last_plan_type: last_plan_type
+                });
+                
+                // Sync with server after 2 seconds, then close modal and refresh premium tab
+                setTimeout(function() {
+                    hideActivationKeyEntry();
+                    syncPlanWithServer(function() {
+                        fetchPaymentStatus().then(function(payment) {
+                            if (payment) {
+                                _lastPaymentStatus = payment.status;
+                                if (payment.expiresAt) _planExpiresAt = payment.expiresAt;
+                            }
+                            showPlanStatusBanner();
+                            showBuyPremiumButtons();
+                        });
+                    });
+                }, 2000);
+                
+            } else {
+                // API returned an error
+                var errorMsg = data.message || 'Activation failed. Please try again.';
+                showActivationStatus('error', errorMsg);
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Activate';
+                submitBtn.style.opacity = '1';
+            }
+        } catch(e) {
+            showActivationStatus('error', 'Invalid response from server. Please try again.');
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Activate';
+            submitBtn.style.opacity = '1';
+        }
+    };
+    
+    xhr.onerror = function() {
+        showActivationStatus('error', 'Network error. Please check your connection and try again.');
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Activate';
+        submitBtn.style.opacity = '1';
+    };
+    
+    xhr.send(JSON.stringify({
+        whatsappNumber: my_number,
+        activationKey: activationKey
+    }));
+}
+
+// Helper: Show status in activation modal
+function showActivationStatus(type, message) {
+    var statusArea = document.getElementById('activation_status_area');
+    if (!statusArea) return;
+    
+    statusArea.style.display = 'block';
+    
+    if (type === 'loading') {
+        statusArea.style.background = '#1a1a2e';
+        statusArea.style.color = '#aaa';
+        statusArea.style.border = '1px solid #333';
+    } else if (type === 'success') {
+        statusArea.style.background = '#0d2818';
+        statusArea.style.color = '#4ADE80';
+        statusArea.style.border = '1px solid #4ADE8030';
+    } else if (type === 'error') {
+        statusArea.style.background = '#2a0a0a';
+        statusArea.style.color = '#f44';
+        statusArea.style.border = '1px solid #f443030';
+    }
+    
+    statusArea.innerHTML = message;
 }
