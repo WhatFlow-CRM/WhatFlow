@@ -184,3 +184,46 @@ FULL FLOW VERIFICATION ON PRODUCTION:
 - All users active with correct plans
 
 Commit: a5b4df7 deployed to Vercel production
+
+---
+Task ID: 2
+Agent: Main Agent (full-stack)
+Task: Fix plan deactivation not reflecting in extension + clean DB for production
+
+Work Log:
+- Root cause 1: Extension `syncPlanWithServer()` ignored `isActive` flag from server
+- Root cause 2: Status endpoint didn't verify if activation key was still active
+- Root cause 3: Extension showed "Free Trial Active" for deactivated users
+
+Fixes applied:
+- `src/app/api/extension/status/route.ts`: Added key status verification
+  - If user's currentKeyId points to a non-active key, auto-repairs user (sets FreeTrial)
+  - Returns isActive: false + empty features for deactivated users
+- `_locales_ext/js/popup.js`: Fixed syncPlanWithServer()
+  - Now forces plan_type = 'FreeTrial' when isActive is false from server
+  - Clears expiry dates and message limits on deactivation
+  - Changed "Free Trial Active" banner to "No Active Plan"
+  - Changed premium tab header from "Free Trial" to "No Active Plan"
+- `src/app/api/admin/keys/[id]/action/route.ts`: Fixed missing errMsg variable
+
+Database cleanup:
+- Deleted: 4 activity logs, 8 keys, 3 users, 21 features, 2 plans, 4 configs
+- Re-seeded: 2 plans (Basic Rs.500, Advance Rs.1000), 21 features, 7 system configs
+- Result: 0 users, 0 keys - completely clean for production
+
+E2E Test (all passed):
+1. Create key → WF-NB63-63AA-VHX3-GF4F ✅
+2. Activate key → Advance plan, 21 features ✅
+3. Check status → isActive:true, all features enabled ✅
+4. Deactivate key → success ✅
+5. Check status → isActive:false, FreeTrial, empty features ✅
+
+Deployment:
+- Pushed to GitHub (WhatFlow-CRM/WhatFlow main)
+- Vercel deployment: READY at https://what-flow.vercel.app
+
+Stage Summary:
+- Plan deactivation now reflects in extension immediately on next sync
+- Extension properly shows "No Active Plan" when deactivated
+- Database is production-ready with clean slate
+- Full E2E flow verified: create → activate → deactivate → verify
