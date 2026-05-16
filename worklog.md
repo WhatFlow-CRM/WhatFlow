@@ -445,3 +445,137 @@ Stage Summary:
 - Comprehensive onboarding guide added
 - All 7 modified JS files pass syntax check
 - All working features preserved and unchanged
+
+---
+Task ID: 3-b
+Agent: full-stack-developer
+Task: Create Follow-up Reminders API routes
+
+Work Log:
+- Created /api/admin/reminders/route.ts with GET, POST, PUT, DELETE handlers
+- GET: Auto-marks overdue reminders (reminderDate+reminderTime < now), filters by status/userId/phoneNumber/fromDate/toDate, paginated, includes lead name, ordered by reminderDate ASC, returns overdueCount
+- POST: Validates phoneNumber, userId, reminderDate required; validates date not in past; optionally links to lead
+- PUT: Validates status enum (pending/completed/overdue); auto-sets completedAt on completed; resets to pending when rescheduling date
+- DELETE: Validates reminder exists before deletion
+- All responses use HTTP 200 with {success: true/false, ...} pattern matching existing routes
+- ESLint passes cleanly on the new file
+
+Stage Summary:
+- Reminders CRUD API fully implemented at /api/admin/reminders
+- All 4 HTTP methods (GET/POST/PUT/DELETE) working with proper validation and error handling
+- Auto-overdue detection runs on every GET request
+- Consistent with existing admin route patterns (db import, error handling, response format)
+---
+Task ID: 3-e
+Agent: full-stack-developer
+Task: Create AI Suggested Replies API route
+
+Work Log:
+- Created /api/admin/ai-reply/route.ts with POST handler
+- Supports two modes: "suggest" (3 reply options) and "rewrite" (1 improved version)
+- 7 tone options: professional, friendly, short, detailed, urdu, english, roman_urdu
+- Uses z-ai-web-dev-sdk for backend AI generation
+- Input validation: non-empty customerMessage/message, max 2000 chars
+- 15-second timeout on AI calls
+- Error handling: catches SDK failures, returns generic "AI service temporarily unavailable"
+- Structured prompt engineering with SUGGESTION_1/2/3 parsing and fallback line splitting
+- All responses use HTTP 200 with {success: true/false} pattern (consistent with project conventions)
+
+Stage Summary:
+- AI Replies API fully implemented
+---
+Task ID: 3-a
+Agent: full-stack-developer
+Task: Create Leads API routes
+
+Work Log:
+- Created /api/admin/leads/route.ts with GET, POST, PUT, DELETE handlers
+- GET: List leads with search (phoneNumber, name, email), status filter, pagination (page/limit), enriched with assigned user name and status display name
+- POST: Upsert lead by phoneNumber (unique), auto-sets lastMessageAt to now(), updates only provided fields if lead exists
+- PUT: Update lead by id with partial field updates (name, email, status, notes, assignedUserId)
+- DELETE: Delete lead by id, cleans up related FollowUpReminders (sets leadId to null)
+- Status display names mapping: new→"New Lead", interested→"Interested", followup→"Follow-up Required", converted→"Converted", not_interested→"Not Interested", complaint→"Complaint", pending_payment→"Pending Payment"
+- All responses use HTTP 200 with {success: true/false, ...} pattern consistent with project conventions
+
+Stage Summary:
+- Leads CRUD API fully implemented
+---
+Task ID: 3-c
+Agent: full-stack-developer
+Task: Create Blacklist API routes
+
+Work Log:
+- Created /api/admin/blacklist/route.ts with GET, POST, DELETE handlers
+  - GET: List blacklisted numbers with search (phoneNumber/notes/reason), filter by reason, pagination (page/limit), returns reasons with display names
+  - POST: Add single number to blacklist with phone normalization (strip non-digits), upsert to handle duplicates, validates minimum length
+  - DELETE: Remove number by id or phoneNumber, handles not-found errors
+- Created /api/admin/blacklist/check/route.ts with POST handler
+  - Batch check numbers against blacklist (used before campaigns)
+  - Normalizes all input numbers, deduplicates
+  - Single DB query with `in` clause for efficiency
+  - Returns checked count, blacklisted array, safe array, and blacklistedNumbers with reason/notes
+- Created /api/admin/blacklist/bulk/route.ts with POST handler
+  - Bulk add numbers with batched inserts (100 per batch) to avoid DB limits
+  - Pre-checks existing entries to skip duplicates
+  - Returns added/skipped counts
+- All responses use HTTP 200 with {success: true/false, ...} pattern consistent with project conventions
+- ESLint passes cleanly on all 3 new files
+
+Stage Summary:
+- Blacklist API fully implemented with 5 endpoints across 3 route files
+- Campaign pre-check support via /api/admin/blacklist/check
+- Phone number normalization ensures consistent storage format
+---
+Task ID: 3-d
+Agent: full-stack-developer
+Task: Create Campaign Analytics API routes
+
+Work Log:
+- Created /api/admin/campaigns/route.ts with GET (list + analytics), POST, PUT
+  - GET list: Filters by userId, status, fromDate, toDate, search (name), paginated (page/limit)
+  - GET list: Includes user whatsappNumber as "userPhone" via user map lookup
+  - GET list: Returns summary stats (total, per-status counts, totalSent/Failed/Pending)
+  - GET analytics (?analytics=true): Full dashboard data — aggregate sums, per-status counts, avgDeliveryRate, avgResponseRate, daily stats for last 30 days (grouped by createdAt)
+  - POST: Creates new campaign (name + userId required, optional totalNumbers)
+  - PUT: Updates campaign fields (status, name, all stat counters, startedAt, completedAt)
+- Created /api/admin/campaigns/[id]/route.ts with GET (detail + messages), DELETE
+  - GET: Returns campaign with userPhone, paginated messages (page/limit, filterable by messageStatus), messages ordered ASC
+  - DELETE: Explicitly deletes messages then campaign (cascade safety)
+- All responses use HTTP 200 with {success: true/false, ...} pattern consistent with project conventions
+- ESLint passes cleanly on both new files
+
+Stage Summary:
+- Campaign CRUD and Analytics API fully implemented
+---
+Task ID: 4
+Agent: full-stack-developer
+Task: Build Admin Panel UI for 5 new features + Privacy section
+
+Work Log:
+- Added 5 new tabs to admin dashboard: Leads, Reminders, Blacklist, Campaigns, AI Replies
+- Added Privacy & Data Usage section to Settings tab
+- Added 14 new lucide-react icon imports (Contact, Bell, BarChart3, Bot, Trash2, Calendar, Send, Lock, FileText, AlertTriangle, ShieldCheck, ChevronDown, Pencil, Info)
+- Added 8 new TypeScript interfaces (Lead, Reminder, BlacklistedNumber, Campaign, CampaignMessage, CampaignAnalytics)
+- Added 7 new constants (LEAD_STATUS_OPTIONS, LEAD_SOURCE_OPTIONS, REMINDER_STATUS_COLORS, BLACKLIST_REASON_OPTIONS, AI_TONE_OPTIONS, CAMPAIGN_STATUS_COLORS, and color maps)
+- Added ~70 new state variables for all 5 tabs
+- Added 7 new fetch functions (fetchLeads, fetchReminders, fetchBlacklist, fetchCampaigns, fetchCampaignAnalytics, fetchCampaignMessages, fetchAiEnabled)
+- Added 7 new effects for tab data loading and filter reset
+- Added 12 new handler functions for CRUD operations
+- Updated refresh button to include all new tabs
+- All tabs have full CRUD UI with search, filter, pagination
+- Leads tab: table with quick status dropdown, edit/add dialogs, delete confirmation
+- Reminders tab: summary cards (Pending/Overdue/Completed Today), table with mark complete/reschedule/delete
+- Blacklist tab: add single/bulk dialogs, search by phone/notes, reason filter, remove action
+- Campaigns tab: 8 analytics summary cards, campaign table with number stats, detail dialog with message table
+- AI Replies tab: admin toggle switch, suggest/rewrite modes, 7 tone options, generate button with loading, copy results
+- Privacy section: 6 subsections (Data Collection, Data Usage, Consent, Opt-Out, Security, Retention)
+- Updated TabsList from 7 to 12 tabs total
+- page.tsx grew from 2265 to 3775 lines
+
+Stage Summary:
+- Admin Dashboard now has 12 tabs total (7 existing + 5 new)
+- All new tabs use existing shadcn/ui components
+- Privacy section added to Settings tab with 6 data handling sections
+- No new lint errors introduced (all existing errors are in extension files)
+- No new TypeScript errors in page.tsx (8 pre-existing errors in other files)
+- Dev server running successfully on port 3000

@@ -92,3 +92,96 @@ model SystemConfig {
   value     String
   updatedAt DateTime @updatedAt
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// Feature 2: Lead Status / Mini CRM
+// ═══════════════════════════════════════════════════════════════════════
+
+model Lead {
+  id             String   @id @default(cuid())
+  phoneNumber    String   @unique
+  name           String?
+  email          String?
+  status         String   @default("new") // new, interested, followup, converted, not_interested, complaint, pending_payment
+  assignedUserId String?
+  lastMessageAt  DateTime?
+  notes          String?
+  source         String?  // manual, campaign, import, whatsapp
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  reminders FollowUpReminder[]
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Feature 3: Follow-up Reminders
+// ═══════════════════════════════════════════════════════════════════════
+
+model FollowUpReminder {
+  id           String    @id @default(cuid())
+  leadId       String?
+  phoneNumber  String
+  userId       String    // the staff/user who created it
+  reminderDate DateTime
+  reminderTime String?   // HH:mm format
+  note         String?
+  status       String    @default("pending") // pending, completed, overdue
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Feature 4: Do Not Message / Blacklist
+// ═══════════════════════════════════════════════════════════════════════
+
+model BlacklistedNumber {
+  id        String   @id @default(cuid())
+  phoneNumber String @unique
+  reason    String   @default("manual_block") // opted_out, wrong_number, complaint, manual_block, other
+  addedBy   String?  // user id who added it
+  notes     String?
+  createdAt DateTime @default(now())
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Feature 5: Campaign Analytics
+// ═══════════════════════════════════════════════════════════════════════
+
+model Campaign {
+  id                String    @id @default(cuid())
+  name              String
+  userId            String    // the staff/user who created it
+  status            String    @default("pending") // pending, running, completed, paused, failed
+  totalNumbers      Int       @default(0)
+  validNumbers      Int       @default(0)
+  invalidNumbers    Int       @default(0)
+  duplicateNumbers  Int       @default(0)
+  blacklistedNumbers Int      @default(0)
+  sentCount         Int       @default(0)
+  failedCount       Int       @default(0)
+  pendingCount      Int       @default(0)
+  responseCount     Int       @default(0)
+  startedAt         DateTime?
+  completedAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  messages CampaignMessage[]
+}
+
+model CampaignMessage {
+  id          String    @id @default(cuid())
+  campaignId  String
+  phoneNumber String
+  status      String    @default("pending") // pending, sent, delivered, read, failed
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  readAt      DateTime?
+  errorMessage String?
+  createdAt   DateTime  @default(now())
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+}
