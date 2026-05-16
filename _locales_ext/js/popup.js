@@ -1188,7 +1188,14 @@ async function sendMessageFunction() {
     chrome.storage.local.set({ 'captionForIndividualAttachment': [] })
     document.querySelector(".captionTextAreas").innerHTML="";
     const messageSendingTo= messageToggleSwitchValue;
-    var numbers_str = document.querySelector("textarea#numbers").value;
+    // Read numbers directly from visual tags (primary) with fallback to hidden textarea
+    var numbers_str = Array.from(document.querySelectorAll('#numbers-display .number-tag .number'))
+        .map(el => el.textContent.trim())
+        .filter(n => n.length > 0)
+        .join(', ');
+    if (!numbers_str) {
+        numbers_str = document.querySelector("textarea#numbers").value;
+    }
     var message = document.querySelector("textarea#message").value;
     var attachments_str = document.querySelector("#attachments-container").innerText;
     var customization = true;
@@ -2148,7 +2155,14 @@ function getMessage() {
             var messageSendingTo = messageToggleSwitchValue || 'numbers';
             var schedule_time = document.querySelector("#schedule_time").value;
             var schedule_date= document.querySelector("#schedule_day").value;
-            var numbers_str = document.querySelector("textarea#numbers").value;
+            // Read numbers directly from visual tags (primary) with fallback to hidden textarea
+            var numbers_str = Array.from(document.querySelectorAll('#numbers-display .number-tag .number'))
+                .map(el => el.textContent.trim())
+                .filter(n => n.length > 0)
+                .join(', ');
+            if (!numbers_str) {
+                numbers_str = document.querySelector("textarea#numbers").value;
+            }
             var message = document.querySelector("textarea#message").value;
             var attachments_str = document.querySelector("#attachments-container").innerText;
             var customization = true;
@@ -3090,7 +3104,9 @@ function trackGenericEvent(event, data) {
 }
 
 function getFilteredNumbers(numbers_str) {
-    let numbers = numbers_str.replace(/\n/g, ",").split(",");
+    if (!numbers_str || typeof numbers_str !== 'string') return '';
+    // Split on newlines, spaces, tabs, commas, semicolons, pipes — all common number separators
+    let numbers = numbers_str.replace(/[\s,;|]+/g, ",").split(",");
     numbers = numbers.map(num => num.replace(/\D/g, ''));
     numbers = numbers.filter((num) =>  (num.length >= 5 && num.length <= 15));
     let filteredNumbers = numbers.join(',')
@@ -3560,6 +3576,14 @@ $(document).ready(async function () {
         if (event.keyCode && ![13, 188].includes(event.keyCode)) return;
 
         const numbers_str = $(this).val();
+        if (!numbers_str || !numbers_str.trim()) return;
+        // Check if any valid numbers exist before clearing input
+        const filtered = getFilteredNumbers(numbers_str);
+        if (!filtered) {
+            show_error("No valid phone numbers detected. Use commas, spaces, or newlines to separate numbers.");
+            return;
+        }
+        reset_error();
         $(this).val('');
         addNumberTags(numbers_str);
     });
