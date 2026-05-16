@@ -14,13 +14,14 @@ export async function GET(request: NextRequest) {
       where: { whatsappNumber },
     });
 
-    if (!user) {
+    // No user or not active → FreeTrial
+    if (!user || !user.isActive) {
       return NextResponse.json({
         planType: 'FreeTrial',
         isActive: false,
         expiresAt: null,
         subscribedAt: null,
-        lastPlanType: null,
+        lastPlanType: user?.lastPlanType ?? null,
         dailyMessageLimit: 50,
         features: {},
         paymentStatus: null,
@@ -28,11 +29,50 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if subscription is expired
-    let isActive = user.isActive;
     if (user.expiresAt && new Date(user.expiresAt) < new Date()) {
-      isActive = false;
+      return NextResponse.json({
+        planType: 'FreeTrial',
+        isActive: false,
+        expiresAt: null,
+        subscribedAt: null,
+        lastPlanType: user.planType,
+        dailyMessageLimit: 50,
+        features: {},
+        paymentStatus: null,
+      });
     }
 
+    // CRITICAL: Verify the activation key is still active
+    // If admin deactivated the key, the extension must reflect it immediately
+    if (user.currentKeyId) {
+      const activeKey = await db.activationKey.findUnique({
+        where: { id: user.currentKeyId },
+      });
+      if (!activeKey || activeKey.status !== 'active') {
+        // Key was deactivated/revoked → force user back to FreeTrial
+        await db.user.update({
+          where: { whatsappNumber },
+          data: {
+            isActive: false,
+            lastPlanType: user.planType,
+            planType: 'FreeTrial',
+            currentKeyId: null,
+          },
+        });
+        return NextResponse.json({
+          planType: 'FreeTrial',
+          isActive: false,
+          expiresAt: null,
+          subscribedAt: null,
+          lastPlanType: user.planType,
+          dailyMessageLimit: 50,
+          features: {},
+          paymentStatus: null,
+        });
+      }
+    }
+
+    // User is genuinely active with a valid key
     const plan = await db.plan.findUnique({
       where: { planType: user.planType },
     });
@@ -62,7 +102,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       planType: user.planType,
-      isActive,
+      isActive: true,
       expiresAt: user.expiresAt,
       subscribedAt: user.activatedAt,
       lastPlanType: user.lastPlanType,

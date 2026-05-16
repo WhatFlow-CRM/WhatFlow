@@ -32,20 +32,20 @@ function syncPlanWithServer(callback) {
             try {
                 var data = JSON.parse(xhr.responseText);
                 var old_plan = plan_type;
-                plan_type = data.planType || 'Expired';
-                if (data.planDuration) plan_duration = data.planDuration;
+                // CRITICAL: If server says not active, force FreeTrial regardless of planType
+                if (data.isActive === false || !data.isActive) {
+                    plan_type = 'FreeTrial';
+                    _planExpiresAt = null;
+                    subscribed_date = null;
+                    handle_message_limit = 50;
+                } else {
+                    plan_type = data.planType || 'Expired';
+                    if (data.planDuration) plan_duration = data.planDuration;
+                    if (data.dailyMessageLimit) handle_message_limit = data.dailyMessageLimit;
+                    if (data.subscribedAt) subscribed_date = data.subscribedAt;
+                    if (data.expiresAt) _planExpiresAt = data.expiresAt;
+                }
                 if (data.lastPlanType) last_plan_type = data.lastPlanType;
-                if (data.isActive !== undefined) {
-                    // isActive is already handled by plan_type
-                }
-                if (data.dailyMessageLimit) {
-                    handle_message_limit = data.dailyMessageLimit;
-                }
-                if (data.subscribedAt) {
-                    subscribed_date = data.subscribedAt;
-                }
-                // Track plan expiry and payment status
-                if (data.expiresAt) _planExpiresAt = data.expiresAt;
                 if (data.paymentStatus) _lastPaymentStatus = data.paymentStatus;
                 // Save to chrome storage
                 chrome.storage.local.set({
@@ -54,9 +54,9 @@ function syncPlanWithServer(callback) {
                     last_plan_type: last_plan_type,
                     subscribed_date: subscribed_date
                 });
-                // If plan changed, show notification
-                if (old_plan !== plan_type && plan_type !== 'Expired') {
-                    console.log("Plan synced from server: " + plan_type);
+                // If plan changed, log it
+                if (old_plan !== plan_type) {
+                    console.log("Plan synced from server: " + old_plan + " -> " + plan_type);
                 }
             } catch(e) {
                 console.log("Failed to parse server plan data");
@@ -860,7 +860,7 @@ function initvars() {
             } else {
                 document.getElementById("user_info_text").innerHTML = 
                  `<div style="font-weight:500;" class="premium_user_plan_type">
-                    ${plan_type === "FreeTrial" ? "Free Trial" : "Premium Plan"}
+                    ${plan_type === "FreeTrial" ? "No Active Plan" : plan_type + " Plan Active"}
                   </div>`;
             }
           
@@ -2586,17 +2586,11 @@ function showPlanStatusBanner() {
         banner.style.border = '1px solid #C3E6CB';
         var expiryText = _planExpiresAt ? ' | Expires: ' + new Date(_planExpiresAt).toLocaleDateString() : '';
         banner.innerHTML = '&#9989; <strong>' + plan_type + ' Plan Active</strong>' + expiryText;
-    } else if (isExpired()) {
+    } else if (isExpired() || isTrial()) {
         banner.style.background = '#F8D7DA';
         banner.style.color = '#721C24';
         banner.style.border = '1px solid #F5C6CB';
         banner.innerHTML = '&#9888; <strong>No Active Plan</strong> – <u>Upgrade now</u> to unlock all features.';
-    } else if (isTrial()) {
-        banner.style.background = '#FFF3CD';
-        banner.style.color = '#856404';
-        banner.style.border = '1px solid #FFEEBA';
-        var trialExpiry = _planExpiresAt ? ' | Expires: ' + new Date(_planExpiresAt).toLocaleDateString() : '';
-        banner.innerHTML = '&#9201; <strong>Free Trial Active</strong>' + trialExpiry + ' – <u>Upgrade</u> for full access.';
     } else {
         banner.style.background = '#E2E3E5';
         banner.style.color = '#383D41';
