@@ -15,7 +15,7 @@ export async function PUT(
     });
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'User not found' });
     }
 
     const updateData: Record<string, unknown> = {};
@@ -35,8 +35,7 @@ export async function PUT(
 
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
-        { error: 'No valid fields to update' },
-        { status: 400 }
+        { success: false, error: 'No valid fields to update' }
       );
     }
 
@@ -66,6 +65,6 @@ export async function PUT(
   } catch (error) {
     console.error('Error updating user:', error);
     const errMsg = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: 'Failed to update user: ' + errMsg }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Failed to update user: ' + errMsg });
   }
 }

@@ -11,7 +11,7 @@ export async function POST(
     const { action } = body;
 
     if (!action) {
-      return NextResponse.json({ error: 'action is required' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'action is required' });
     }
 
     const key = await db.activationKey.findUnique({
@@ -19,14 +19,13 @@ export async function POST(
     });
 
     if (!key) {
-      return NextResponse.json({ error: 'Key not found' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'Key not found' });
     }
 
     if (action === 'deactivate') {
       if (key.status !== 'active') {
         return NextResponse.json(
-          { error: `Cannot deactivate a key with status "${key.status}"` },
-          { status: 400 }
+          { success: false, error: `Cannot deactivate a key with status "${key.status}"` }
         );
       }
 
@@ -78,10 +77,10 @@ export async function POST(
       });
     }
 
-    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+    return NextResponse.json({ success: false, error: 'Invalid action' });
   } catch (error) {
     console.error('Error performing key action:', error);
     const errMsg = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: 'Failed to perform key action: ' + errMsg }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Failed to perform key action: ' + errMsg });
   }
 }

@@ -24,8 +24,7 @@ export async function POST(request: NextRequest) {
 
     if (!planType || !durationDays) {
       return NextResponse.json(
-        { error: 'planType and durationDays are required' },
-        { status: 400 }
+        { success: false, error: 'planType and durationDays are required' }
       );
     }
 
@@ -35,7 +34,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!plan) {
-      return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'Plan not found' });
     }
 
     // Validate count
@@ -62,8 +61,7 @@ export async function POST(request: NextRequest) {
 
     if (generatedKeys.length < numKeys) {
       return NextResponse.json(
-        { error: 'Could not generate enough unique keys. Try again.' },
-        { status: 500 }
+        { success: false, error: 'Could not generate enough unique keys. Try again.' }
       );
     }
 
@@ -93,12 +91,11 @@ export async function POST(request: NextRequest) {
         keys,
         count: createdKeys.count,
         message: `${createdKeys.count} key(s) generated successfully`,
-      },
-      { status: 201 }
+      }
     );
   } catch (error) {
     console.error('Error generating activation keys:', error);
     const errMsg = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: 'Failed to generate keys: ' + errMsg }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Failed to generate keys: ' + errMsg });
   }
 }

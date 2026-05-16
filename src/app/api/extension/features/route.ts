@@ -1,13 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: corsHeaders });
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const whatsappNumber = searchParams.get('whatsappNumber');
 
     if (!whatsappNumber) {
-      return NextResponse.json({ error: 'whatsappNumber is required' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'whatsappNumber is required' }, { headers: corsHeaders });
     }
 
     const user = await db.user.findUnique({
@@ -21,7 +31,7 @@ export async function GET(request: NextRequest) {
       for (const f of allFeatures) {
         features[f.featureKey] = false;
       }
-      return NextResponse.json(features);
+      return NextResponse.json(features, { headers: corsHeaders });
     }
 
     // Get plan feature access
@@ -49,9 +59,9 @@ export async function GET(request: NextRequest) {
         : (planAccess?.isEnabled ?? false);
     }
 
-    return NextResponse.json(features);
+    return NextResponse.json(features, { headers: corsHeaders });
   } catch (error) {
     console.error('Error fetching features:', error);
-    return NextResponse.json({});
+    return NextResponse.json({}, { headers: corsHeaders });
   }
 }

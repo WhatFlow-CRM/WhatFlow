@@ -50,7 +50,7 @@ export async function PUT(request: NextRequest) {
     const { featureKey, displayName, isActive } = body;
 
     if (!featureKey) {
-      return NextResponse.json({ error: 'featureKey is required' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'featureKey is required' });
     }
 
     const existingFeature = await db.feature.findUnique({
@@ -73,13 +73,13 @@ export async function PUT(request: NextRequest) {
         data: { featureKey, displayName, isActive: isActive !== undefined ? isActive : true },
       });
     } else {
-      return NextResponse.json({ error: 'Feature not found. Provide displayName to create it.' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'Feature not found. Provide displayName to create it.' });
     }
 
     return NextResponse.json({ feature });
   } catch (error) {
     console.error('Error updating feature:', error);
     const errMsg = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: 'Failed to update feature: ' + errMsg }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Failed to update feature: ' + errMsg });
   }
 }

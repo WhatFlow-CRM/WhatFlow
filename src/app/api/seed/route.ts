@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
 const DEFAULT_PLANS = [
@@ -42,8 +42,15 @@ const ADVANCE_FEATURES = [
   'stopCampaign', 'groupExport', 'prioritySupport', 'verifyNumbers', 'chatSupport'
 ];
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
+    // API key check
+    const seedApiKey = process.env.SEED_API_KEY || 'whatflow-default-seed-key';
+    const providedKey = request.headers.get('x-seed-key');
+    if (providedKey !== seedApiKey) {
+      return NextResponse.json({ error: 'Invalid or missing seed API key' }, { status: 403 });
+    }
+
     // Upsert plans (update if exists)
     for (const plan of DEFAULT_PLANS) {
       await db.plan.upsert({
@@ -84,12 +91,16 @@ export async function POST() {
       });
     }
 
-    // System config
+    // System config — PII moved to environment variables with fallbacks
+    const paymentAccountNumber = process.env.PAYMENT_ACCOUNT_NUMBER || '03269580417';
+    const paymentAccountTitle = process.env.PAYMENT_ACCOUNT_TITLE || 'Irfan Ilahee Munir';
+    const supportPhone = process.env.SUPPORT_PHONE || '923269580417';
+
     const configs = [
-      { key: 'payment_account_number', value: '03269580417' },
-      { key: 'payment_account_title', value: 'Irfan Ilahee Munir' },
-      { key: 'support_phone', value: '923269580417' },
-      { key: 'support_whatsapp_link', value: 'https://wa.me/923269580417' },
+      { key: 'payment_account_number', value: paymentAccountNumber },
+      { key: 'payment_account_title', value: paymentAccountTitle },
+      { key: 'support_phone', value: supportPhone },
+      { key: 'support_whatsapp_link', value: `https://wa.me/${supportPhone}` },
     ];
 
     for (const config of configs) {

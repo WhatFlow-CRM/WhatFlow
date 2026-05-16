@@ -124,6 +124,6 @@ export async function POST() {
     });
   } catch (error) {
     console.error('Error cleaning dummy keys:', error);
-    return NextResponse.json({ error: 'Database operation failed' }, { status: 503 });
+    return NextResponse.json({ success: false, error: 'Database operation failed' });
   }
 }

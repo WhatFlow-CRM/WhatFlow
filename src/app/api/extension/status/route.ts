@@ -1,13 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: corsHeaders });
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const whatsappNumber = searchParams.get('whatsappNumber');
 
     if (!whatsappNumber) {
-      return NextResponse.json({ error: 'whatsappNumber is required' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'whatsappNumber is required' }, { headers: corsHeaders });
     }
 
     const user = await db.user.findUnique({
@@ -25,7 +35,7 @@ export async function GET(request: NextRequest) {
         dailyMessageLimit: 50,
         features: {},
         paymentStatus: null,
-      });
+      }, { headers: corsHeaders });
     }
 
     // Check if subscription is expired
@@ -39,7 +49,7 @@ export async function GET(request: NextRequest) {
         dailyMessageLimit: 50,
         features: {},
         paymentStatus: null,
-      });
+      }, { headers: corsHeaders });
     }
 
     // CRITICAL: Verify the activation key is still active
@@ -68,7 +78,7 @@ export async function GET(request: NextRequest) {
           dailyMessageLimit: 50,
           features: {},
           paymentStatus: null,
-        });
+        }, { headers: corsHeaders });
       }
     }
 
@@ -109,7 +119,7 @@ export async function GET(request: NextRequest) {
       dailyMessageLimit: plan?.dailyMessageLimit ?? 50,
       features,
       paymentStatus: null,
-    });
+    }, { headers: corsHeaders });
   } catch (error) {
     console.error('Error fetching extension status:', error);
     return NextResponse.json({
@@ -121,6 +131,6 @@ export async function GET(request: NextRequest) {
       dailyMessageLimit: 50,
       features: {},
       paymentStatus: null,
-    });
+    }, { headers: corsHeaders });
   }
 }

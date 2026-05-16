@@ -32,8 +32,7 @@ export async function PUT(request: NextRequest) {
 
     if (!key || value === undefined) {
       return NextResponse.json(
-        { error: 'key and value are required' },
-        { status: 400 }
+        { success: false, error: 'key and value are required' }
       );
     }
 
@@ -47,6 +46,6 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error('Error updating system config:', error);
     const errMsg = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: 'Failed to update config: ' + errMsg }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Failed to update config: ' + errMsg });
   }
 }

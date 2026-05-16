@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: corsHeaders });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -21,7 +31,7 @@ export async function POST(request: NextRequest) {
           error:
             'Missing required fields: whatsappNumber, paymentMethod, amount, planType, proofImage',
         },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -34,9 +44,16 @@ export async function POST(request: NextRequest) {
 
     // Create activity log for payment proof submission (legacy compat)
     const user = await db.user.findUnique({ where: { whatsappNumber } });
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Failed to create or retrieve user record' }
+      );
+    }
+
     await db.activityLog.create({
       data: {
-        userId: user?.id || whatsappNumber,
+        userId: user.id,
         action: 'payment_submitted',
         details: JSON.stringify({
           paymentMethod,
@@ -56,10 +73,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { success: true, message: 'Payment proof submitted successfully' },
-      { status: 201 }
+      { status: 201, headers: corsHeaders }
     );
   } catch (error) {
     console.error('Error submitting payment proof:', error);
-    return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
+    return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503, headers: corsHeaders });
   }
 }

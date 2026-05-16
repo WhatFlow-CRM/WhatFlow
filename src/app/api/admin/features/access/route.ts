@@ -8,21 +8,20 @@ export async function PUT(request: NextRequest) {
 
     if (!planType || !featureKey) {
       return NextResponse.json(
-        { error: 'planType and featureKey are required' },
-        { status: 400 }
+        { success: false, error: 'planType and featureKey are required' }
       );
     }
 
     // Verify plan exists
     const plan = await db.plan.findUnique({ where: { planType } });
     if (!plan) {
-      return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'Plan not found' });
     }
 
     // Verify feature exists
     const feature = await db.feature.findUnique({ where: { featureKey } });
     if (!feature) {
-      return NextResponse.json({ error: 'Feature not found' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'Feature not found' });
     }
 
     // Upsert plan-feature access
@@ -44,6 +43,6 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error('Error updating plan-feature access:', error);
     const errMsg = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: 'Failed to update plan-feature access: ' + errMsg }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Failed to update plan-feature access: ' + errMsg });
   }
 }

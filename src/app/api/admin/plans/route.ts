@@ -5,12 +5,19 @@ export async function GET() {
   try {
     const plans = await db.plan.findMany({
       orderBy: { monthlyPrice: 'asc' },
-      include: {
-        _count: {
-          select: { users: true },
-        },
-      },
     });
+
+    // Get user counts per planType
+    let userCounts: Record<string, number> = {};
+    try {
+      const grouped = await db.user.groupBy({
+        by: ['planType'],
+        _count: { id: true },
+      });
+      for (const g of grouped) {
+        userCounts[g.planType] = g._count.id;
+      }
+    } catch { /* groupBy may fail on empty table */ }
 
     // Get feature access for each plan
     const plansWithFeatures = await Promise.all(
@@ -27,6 +34,7 @@ export async function GET() {
             featureName: fa.feature.displayName,
             isEnabled: fa.isEnabled,
           })),
+          _count: { users: userCounts[plan.planType] ?? 0 },
         };
       })
     );
@@ -35,10 +43,9 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching plans:', error);
     return NextResponse.json({
-      plans: [
-        { planType: 'Basic', displayName: 'Basic Plan', monthlyPrice: 500, annualPrice: 5000, dailyMessageLimit: 100, isActive: true, features: [], _count: { users: 0 } },
-        { planType: 'Advance', displayName: 'Advance Plan', monthlyPrice: 1000, annualPrice: 10000, dailyMessageLimit: 500, isActive: true, features: [], _count: { users: 0 } },
-      ],
+      success: false,
+      error: 'Failed to fetch plans',
+      plans: [],
     });
   }
 }
@@ -50,7 +57,7 @@ export async function PUT(request: NextRequest) {
       body;
 
     if (!planType) {
-      return NextResponse.json({ error: 'planType is required' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'planType is required' });
     }
 
     const plan = await db.plan.findUnique({
@@ -58,7 +65,7 @@ export async function PUT(request: NextRequest) {
     });
 
     if (!plan) {
-      return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'Plan not found' });
     }
 
     const updatedPlan = await db.plan.update({
@@ -74,10 +81,10 @@ export async function PUT(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ plan: updatedPlan });
+    return NextResponse.json({ success: true, plan: updatedPlan });
   } catch (error) {
     console.error('Error updating plan:', error);
     const errMsg = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: 'Failed to update plan: ' + errMsg }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Failed to update plan: ' + errMsg });
   }
 }

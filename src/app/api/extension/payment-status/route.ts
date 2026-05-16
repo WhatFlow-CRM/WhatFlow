@@ -1,28 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: corsHeaders });
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const whatsappNumber = searchParams.get('whatsappNumber');
 
     if (!whatsappNumber) {
-      return NextResponse.json({ error: 'whatsappNumber is required' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'whatsappNumber is required' }, { headers: corsHeaders });
+    }
+
+    // Look up user by whatsappNumber first, then use user.id for ActivityLog query
+    const user = await db.user.findUnique({
+      where: { whatsappNumber },
+    });
+
+    if (!user) {
+      return NextResponse.json({ hasPayment: false, latestPayment: null }, { headers: corsHeaders });
     }
 
     const latestLog = await db.activityLog.findFirst({
       where: {
-        userId: whatsappNumber,
+        userId: user.id,
         action: { in: ['payment_submitted', 'payment_approved'] },
       },
       orderBy: { createdAt: 'desc' },
     });
 
     if (!latestLog) {
-      return NextResponse.json({ hasPayment: false, latestPayment: null });
+      return NextResponse.json({ hasPayment: false, latestPayment: null }, { headers: corsHeaders });
     }
 
-    const details = latestLog.details ? JSON.parse(latestLog.details) : {};
+    let details = {};
+    try {
+      details = latestLog.details ? JSON.parse(latestLog.details) : {};
+    } catch {
+      details = {};
+    }
 
     return NextResponse.json({
       hasPayment: true,
@@ -33,9 +57,9 @@ export async function GET(request: NextRequest) {
         ...details,
         createdAt: latestLog.createdAt,
       },
-    });
+    }, { headers: corsHeaders });
   } catch (error) {
     console.error('Error fetching payment status:', error);
-    return NextResponse.json({ hasPayment: false });
+    return NextResponse.json({ hasPayment: false }, { headers: corsHeaders });
   }
 }

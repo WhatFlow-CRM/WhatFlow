@@ -8,21 +8,20 @@ export async function PUT(request: NextRequest) {
 
     if (!userId || !featureKey) {
       return NextResponse.json(
-        { error: 'userId and featureKey are required' },
-        { status: 400 }
+        { success: false, error: 'userId and featureKey are required' }
       );
     }
 
     // Verify user exists
     const user = await db.user.findUnique({ where: { id: userId } });
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'User not found' });
     }
 
     // Verify feature exists
     const feature = await db.feature.findUnique({ where: { featureKey } });
     if (!feature) {
-      return NextResponse.json({ error: 'Feature not found' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'Feature not found' });
     }
 
     // Upsert feature override
@@ -61,6 +60,6 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error('Error setting feature override:', error);
     const errMsg = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: 'Failed to set feature override: ' + errMsg }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Failed to set feature override: ' + errMsg });
   }
 }

@@ -12,9 +12,9 @@ export async function GET(request: NextRequest) {
 
     if (search) {
       where.OR = [
-        { whatsappNumber: { contains: search } },
-        { name: { contains: search } },
-        { email: { contains: search } },
+        { whatsappNumber: { contains: search, mode: 'insensitive' } },
+        { name: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
       ];
     }
 
