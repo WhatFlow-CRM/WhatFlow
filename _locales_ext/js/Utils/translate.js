@@ -117,7 +117,7 @@ function add_traslate_button() {
         <div id="translate_message_btn" class="btn" style="display: ${(is_translate_enabled) ? "none" : "flex"}; text-transform:none;">
             <img src="${translate_icon_1}" class="translate_icon" width="17px"/>
             <div><span id="detected_language_names"></span> > <span id="targeted_language_name"></span></div>
-            <span class="highlight" style="text-transform:none;">Translate using Pro Sender</span>
+            <span class="highlight" style="text-transform:none;">Translate using WhatFlow CRM</span>
         </div>
         <div id="original_message_btn" class="btn" style="display: ${(is_translate_enabled) ? "flex" : "none"}">
             <img src="${translate_icon_2}" class="translate_icon" width="17px"/>

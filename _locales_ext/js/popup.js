@@ -1803,7 +1803,7 @@ function getMessage() {
         trackButtonClick('send_message_button');
     });
     $('#how_to_use').click(function () {
-        trackButtonClick('how_to_use_pro_sender');
+        trackButtonClick('how_to_use_whatflow');
         if (messageToggleSwitchValue !== "numbers") {
             document.querySelector("#message_type_numbers").click()
           }
@@ -5214,7 +5214,7 @@ function showEditScheduleCampaignPopup(campaign, index, scheduledCampaigns) {
             <div class="popup-footer">
                 <div class="popup-footer-container">
                     <div class="logo-div">
-                        <img class="logo-icon" src="logo/prosenderLogo.png" alt="WhatFlow CRM"/>
+                        <img class="logo-icon" src="logo/logo-img.png" alt="WhatFlow CRM"/>
                         <span style="font-size:20px;color:#6C3CE1;font-weight:600;letter-spacing:1px;">WhatFlow CRM</span>
                     </div>
                 </div>

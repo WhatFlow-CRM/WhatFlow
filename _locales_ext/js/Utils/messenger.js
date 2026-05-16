@@ -1016,7 +1016,7 @@ async function campaign_end_popup(reports, sent_count, total_numbers, total_time
         });
     });
 
-    let shareMessage = "Try this amazing Chrome extension! 🚀\nBoost your productivity with Pro Sender – Free AI Web Sender\n✅ Send personalised messages\n✅ Use AI-powered features\n✅ No signup needed — completely FREE!\n\n➕ Add it now from the Chrome Web Store: " + RUNTIME_CONFIG.reviewUrl;
+    let shareMessage = "Try this amazing Chrome extension! 🚀\nBoost your productivity with WhatFlow CRM – WhatsApp Messaging Tool\n✅ Send personalised messages\n✅ Use AI-powered features\n✅ No signup needed — completely FREE!\n\n➕ Add it now from the Chrome Web Store: " + RUNTIME_CONFIG.reviewUrl;
 
     const popup = document.createElement('div');
     popup.className = 'campaign-end trial_popup prime_content_popup';
@@ -1037,7 +1037,7 @@ async function campaign_end_popup(reports, sent_count, total_numbers, total_time
     
     const firstLine = document.createElement('div');
     firstLine.className = 'share-text-first-line';
-    firstLine.innerHTML = 'Enjoying <span style="font-weight: bold;">Pro Sender</span>?';
+    firstLine.innerHTML = 'Enjoying <span style="font-weight: bold;">WhatFlow CRM</span>?';
     
     const secondLine = document.createElement('div');
     secondLine.className = 'share-text-second-line';

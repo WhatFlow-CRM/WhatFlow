@@ -714,15 +714,15 @@ let HELP_MESSAGE_LANGUAGE_CODES = ["en", "pt", "es", "id", "ar", "zh", "ru", "fr
 
 // Help Messages
 let HELP_MESSAGES = {
-    REQUEST_CHAT_SUPPORT_BASIC: "Hi, I would like to request chat support for Pro Sender Basic.",
-    REQUEST_CHAT_SUPPORT_ADVANCE: "Hi, I would like to request chat support for Pro Sender Premium.",
-    REQUEST_ZOOM_SUPPORT_BASIC: "Hi, I would like to request video call support for Pro Sender Basic.",
-    REQUEST_ZOOM_SUPPORT_ADVANCE: "Hi, I would like to request video call support for Pro Sender Premium.",
-    REQUEST_CALL_SUPPORT_ADVANCE: "Hi, I would like to request call support for Pro Sender Premium.",
-    REQUEST_CALL_SUPPORT_BASIC: "Hi, I would like to request call support for Pro Sender Basic.",
+    REQUEST_CHAT_SUPPORT_BASIC: "Hi, I would like to request chat support for WhatFlow CRM Basic.",
+    REQUEST_CHAT_SUPPORT_ADVANCE: "Hi, I would like to request chat support for WhatFlow CRM Premium.",
+    REQUEST_ZOOM_SUPPORT_BASIC: "Hi, I would like to request video call support for WhatFlow CRM Basic.",
+    REQUEST_ZOOM_SUPPORT_ADVANCE: "Hi, I would like to request video call support for WhatFlow CRM Premium.",
+    REQUEST_CALL_SUPPORT_ADVANCE: "Hi, I would like to request call support for WhatFlow CRM Premium.",
+    REQUEST_CALL_SUPPORT_BASIC: "Hi, I would like to request call support for WhatFlow CRM Basic.",
     UNSUBSCRIBE_PLAN: "Hi, I would like to unsubscribe from my plan.",
     LEARN_SCHEDULE: "Hi, I want to learn more about the Schedule feature.",
-    NEED_HELP_NON_PREMIUM: "Hi, I need help in using Pro Sender.",
+    NEED_HELP_NON_PREMIUM: "Hi, I need help in using WhatFlow CRM.",
 };
 
 let SHOW_UPDATE_REMINDER_POPUP = false;
@@ -738,7 +738,7 @@ let FAQS = [
         answer: "Yes, every country in the world can use the extension."
     },
     {
-        question: "How to send clickable links through Pro Sender?",
+        question: "How to send clickable links through WhatFlow CRM?",
         answer: "You can send a clickable link to anyone who</br>- Either has your number saved in their phone book</br>- Or has replied to you at least once."
     },
     {

@@ -2,35 +2,7 @@ const PRIME_ACCENT_COLOR = "#6C3CE1"
 const LIGHT_ACCENT_COLOR = "#6C3CE1"
 const LIGHT_GREY_COLOR = "#d3d3d3";
 
-var how_to_use1 = chrome.runtime.getURL("logo/ProSender-GIF-1.gif");
-var how_to_use2 = chrome.runtime.getURL("logo/ProSender-GIF-2.gif");
-var how_to_use3 = chrome.runtime.getURL("logo/ProSender-GIF-3.gif");
-var merged_logo = chrome.runtime.getURL("logo/ProSender-merged.gif");
 var logo_img = chrome.runtime.getURL("logo/logo-img.png");
-
-let HOW_TO_USE = [
-    {
-        image: how_to_use1,
-        content: "Click on the ‘Extensions’ icons at the top right of the chrome window",
-        index: 1,
-        hasPrev: false,
-        hasNext: true,
-    },
-    {
-        image: how_to_use2,
-        content: "Pin the WhatFlow CRM extension icon by clicking on the pin button ",
-        index: 2,
-        hasPrev: true,
-        hasNext: true,
-    },
-    {
-        image: how_to_use3,
-        content: "Start using the extension by clicking on the WhatFlow CRM extension icon",
-        index: 3,
-        hasPrev: true,
-        hasNext: true,
-    },
-];
 
 function show_loader_and_close_popup(popup_name, delay, next_popup = false) {
     $(`#close_${popup_name}_popup`).addClass('loading').html('');
@@ -43,102 +15,66 @@ function show_loader_and_close_popup(popup_name, delay, next_popup = false) {
     }, delay)
 }
 
-const howToUseData= [
-    {
-        image: how_to_use1,
-        content: "Click on the ‘Extensions’ icons at the top right of the chrome window",
-        index: 1,
-        hasPrev: false,
-        hasNext: true,
-    },
-    {
-        image: how_to_use2,
-        content: "Pin the WhatFlow CRM extension icon by clicking on the pin button ",
-        index: 2,
-        hasPrev: true,
-        hasNext: true,
-    }, {
-        image: how_to_use3,
-        content: "Start using the extension by clicking on the WhatFlow CRM extension icon",
-        index: 3,
-        hasPrev: true,
-        hasNext: true,
-    }
-]
-
-function changeNavigationColor(index){
-    if(index==0){
-        if(document.querySelector(".nav_line_1").classList.contains("active_line_class")){
-            document.querySelector(".nav_line_1").classList.remove("active_line_class");
-        }
-        if(document.querySelector(".nav_num_2").classList.contains("active_num_class")){
-            document.querySelector(".nav_num_2").classList.remove("active_num_class");
-        }
-        if(document.querySelector(".nav_line_2").classList.contains("active_line_class")){
-            document.querySelector(".nav_line_2").classList.remove("active_line_class");
-        }
-        if(document.querySelector(".nav_num_3").classList.contains("active_num_class")){
-            document.querySelector(".nav_num_3").classList.remove("active_num_class");
-        }
-    }
-    if(index==1){
-        if(!document.querySelector(".nav_line_1").classList.contains("active_line_class")){
-            document.querySelector(".nav_line_1").classList.add("active_line_class");
-        }
-        if(!document.querySelector(".nav_num_2").classList.contains("active_num_class")){
-            document.querySelector(".nav_num_2").classList.add("active_num_class");
-        }
-        if(document.querySelector(".nav_line_2").classList.contains("active_line_class")){
-            document.querySelector(".nav_line_2").classList.remove("active_line_class");
-        }
-        if(document.querySelector(".nav_num_3").classList.contains("active_num_class")){
-            document.querySelector(".nav_num_3").classList.remove("active_num_class");
-        }
-    }
-    if(index==2){
-        if(!document.querySelector(".nav_line_2").classList.contains("active_line_class")){
-            document.querySelector(".nav_line_2").classList.add("active_line_class");
-        }
-        if(!document.querySelector(".nav_num_3").classList.contains("active_num_class")){
-            document.querySelector(".nav_num_3").classList.add("active_num_class");
-        }
-    }
-}
-
 function howToUsePopup() {
     const parentDiv = document.createElement("div");
     parentDiv.className = "how_to_use_popup";
-
-    const pointsHtml = howToUseData.map((d) => `
-        <div class="how_to_use_text">
-            <p class="ins_number">${d.index}</p>
-            <p class="ins_text">${d.content}</p>
-        </div>
-    `).join("");
 
     const popupHtml = `
         <div class="how_to_use_container">
             <div class="how_to_use_header">
                 <div class="how_to_use_title">
-                    <img style="width: 50px; margin-right:10px;" src=${bulb_icon} alt="" />
-                    <p>How to use</p>
+                    <img class="how_to_use_logo_img" src="${logo_img}" style="width: 50px; margin-right:10px;" alt="" />
+                    <p style="font-size:20px;font-weight:700;color:#6C3CE1;">Welcome to WhatFlow CRM! 🎉</p>
                 </div>
                 <div class="how_to_use_logo">
                     <img class="how_to_use_logo_img" src="${logo_img}"/>
                     <div class="how_to_use_logo_name">WhatFlow CRM</div>
                 </div>
             </div>
-            <div class="how_to_use_body">
-                <div class="how_to_use_points" style="flex:1; display:flex; flex-direction:column; gap:20px;">
-                    ${pointsHtml}
+            <div class="how_to_use_body" style="display:flex; flex-direction:column; gap:16px; padding:16px; max-height:400px; overflow-y:auto;">
+                <p style="font-weight:600; font-size:15px; color:#333;">Here's how to get started:</p>
+                <div style="display:flex; gap:10px; align-items:flex-start;">
+                    <span style="font-size:18px;">1️⃣</span>
+                    <div>
+                        <p style="font-weight:600; font-size:14px; margin:0; color:#6C3CE1;">Activate Your Key</p>
+                        <p style="font-size:13px; margin:4px 0 0 0; color:#555;">Click "Have an activation key?" and enter your WF-XXXX-XXXX-XXXX-XXXX key.</p>
+                    </div>
                 </div>
-                <div class="how_to_use_image" style="flex:1;">
-                    <img src="${merged_logo}" alt="how to use" />
+                <div style="display:flex; gap:10px; align-items:flex-start;">
+                    <span style="font-size:18px;">2️⃣</span>
+                    <div>
+                        <p style="font-weight:600; font-size:14px; margin:0; color:#6C3CE1;">Add Numbers</p>
+                        <p style="font-size:13px; margin:4px 0 0 0; color:#555;">Type numbers manually, import from Excel, or select a saved campaign.</p>
+                    </div>
+                </div>
+                <div style="display:flex; gap:10px; align-items:flex-start;">
+                    <span style="font-size:18px;">3️⃣</span>
+                    <div>
+                        <p style="font-weight:600; font-size:14px; margin:0; color:#6C3CE1;">Write Your Message</p>
+                        <p style="font-size:13px; margin:4px 0 0 0; color:#555;">Type a message or load a template. Add attachments if needed.</p>
+                    </div>
+                </div>
+                <div style="display:flex; gap:10px; align-items:flex-start;">
+                    <span style="font-size:18px;">4️⃣</span>
+                    <div>
+                        <p style="font-weight:600; font-size:14px; margin:0; color:#6C3CE1;">Send or Schedule</p>
+                        <p style="font-size:13px; margin:4px 0 0 0; color:#555;">Click Send for instant delivery, or Schedule for later. Use time gap to avoid restrictions.</p>
+                    </div>
+                </div>
+                <div style="display:flex; gap:10px; align-items:flex-start;">
+                    <span style="font-size:18px;">5️⃣</span>
+                    <div>
+                        <p style="font-weight:600; font-size:14px; margin:0; color:#6C3CE1;">Track Results</p>
+                        <p style="font-size:13px; margin:4px 0 0 0; color:#555;">Check Delivery Reports to see sent, delivered, read, and failed statuses.</p>
+                    </div>
+                </div>
+                <div style="margin-top:8px; padding-top:12px; border-top:1px solid #e0e0e0;">
+                    <p style="font-size:13px; color:#777;">Need help? Click <strong>"Chat Support"</strong> to contact us on WhatsApp.</p>
                 </div>
             </div>
             <div class="how_to_use_buttons">
                 <div id="close_how_to_use_popup" class="how_to_use_button navigation_close_button CtaBtn" style="padding:13px 30px;">
-                    Close
+                    Got it!
                 </div>
             </div>
         </div>
@@ -147,7 +83,6 @@ function howToUsePopup() {
     parentDiv.innerHTML = popupHtml;
     document.body.appendChild(parentDiv);
 
-    // ✅ Search inside parentDiv only
     const closeBtn = parentDiv.querySelector("#close_how_to_use_popup");
     if (closeBtn) {
         closeBtn.addEventListener("click", () => {
@@ -264,4 +199,3 @@ async function suggestion_popup() {
     document.getElementById('add_message').placeholder = await translate('Type your quick reply here')
     document.getElementById('add_message_btn').innerText = await translate('Add Template');
 }
-

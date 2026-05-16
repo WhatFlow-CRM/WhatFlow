@@ -1,7 +1,102 @@
 // ===== Blog Data Object =====
 const BLOG_DATA = [
     {
-        title: "How to Use Pro Sender",
+        title: "How to Use WhatFlow CRM",
+        icon: "logo/help.png",
+        content: `
+        <h2>Getting Started with WhatFlow CRM</h2>
+        
+        <h3>Step 1: Activate Your Extension</h3>
+        <ol>
+            <li>Open WhatFlow CRM by clicking the extension icon in your Chrome toolbar</li>
+            <li>You will see an activation prompt — click <strong>"Have an activation key? Click here"</strong></li>
+            <li>Enter your activation key (format: WF-XXXX-XXXX-XXXX-XXXX)</li>
+            <li>Click <strong>"Activate"</strong> — your plan will be activated instantly</li>
+            <li>Your plan name, expiry date, and features will appear at the top</li>
+        </ol>
+        
+        <h3>Step 2: Enter or Import Phone Numbers</h3>
+        <p><strong>Manual Entry:</strong></p>
+        <ol>
+            <li>Select the correct country code from the dropdown (e.g., +92 for Pakistan)</li>
+            <li>Type phone numbers in the input box — you can separate them with commas, spaces, or new lines</li>
+            <li>Press <strong>Enter</strong> or click away — numbers will appear as tags below the input</li>
+        </ol>
+        <p><strong>Excel Import:</strong></p>
+        <ol>
+            <li>Click <strong>"Import Excel"</strong></li>
+            <li>Choose "Import from Device" to upload a .xlsx or .csv file</li>
+            <li>The first column of your file should contain phone numbers</li>
+            <li>Numbers will be imported and displayed as tags</li>
+        </ol>
+        <p><strong>Saved Campaign Numbers:</strong></p>
+        <ol>
+            <li>Click the <strong>Campaign icon</strong> next to the number input</li>
+            <li>Select any previously saved campaign to load its numbers</li>
+        </ol>
+        
+        <h3>Step 3: Write or Select a Message Template</h3>
+        <ol>
+            <li>Type your message in the message box</li>
+            <li>Or click the <strong>Template icon</strong> to load a saved template</li>
+            <li>You can add <strong>attachments</strong> (images, videos, documents) using the attachment button</li>
+            <li>Use the <strong>Customization</strong> feature to personalize messages with names from Excel</li>
+        </ol>
+        
+        <h3>Step 4: Use Time Gap and Batching</h3>
+        <ol>
+            <li>Enable <strong>"Delay Between Messages"</strong> to avoid WhatsApp restrictions</li>
+            <li>Set a fixed time gap (in seconds) between each message</li>
+            <li>Or use <strong>Random Delay</strong> for more natural sending patterns</li>
+            <li>Enable <strong>Batching</strong> to send messages in groups with pauses between batches</li>
+        </ol>
+        
+        <h3>Step 5: Schedule a Campaign</h3>
+        <ol>
+            <li>Click the <strong>"Schedule"</strong> button (available in Advance plan)</li>
+            <li>Set the <strong>date and time</strong> for your campaign</li>
+            <li>Configure time gap and batching options</li>
+            <li>Click <strong>Confirm</strong> — your campaign will be sent automatically</li>
+            <li>View all scheduled/upcoming campaigns from the campaigns section</li>
+        </ol>
+        
+        <h3>Step 6: Send Messages</h3>
+        <ol>
+            <li>Make sure <strong>WhatsApp Web</strong> is open in your browser</li>
+            <li>Verify your phone numbers appear as tags</li>
+            <li>Verify your message is typed</li>
+            <li>Click the green <strong>"Send"</strong> button</li>
+            <li>WhatFlow CRM will send messages automatically one by one</li>
+        </ol>
+        
+        <h3>Step 7: View Delivery Reports</h3>
+        <ol>
+            <li>After sending, click the <strong>"Delivery Report"</strong> button</li>
+            <li>View the status of each message: Sent, Delivered, Read, or Failed</li>
+            <li>Export reports for your records</li>
+        </ol>
+        
+        <h3>Step 8: Need Help?</h3>
+        <ol>
+            <li>Click <strong>"Chat Support"</strong> to contact WhatFlow CRM support via WhatsApp</li>
+            <li>Support is available for Advance plan users</li>
+            <li>For activation issues, payment inquiries, or feature questions — just send a message</li>
+        </ol>
+        
+        <p><strong>Tips:</strong></p>
+        <ul>
+            <li>Always use a time gap between messages to avoid being blocked by WhatsApp</li>
+            <li>Verify phone numbers before sending to reduce failed deliveries</li>
+            <li>Save frequently used campaigns to reuse them later</li>
+            <li>Keep your WhatsApp Web tab active while sending messages</li>
+        </ul>
+    `,
+        summary: "Complete guide to set up and use WhatFlow CRM — from activation to sending campaigns and viewing delivery reports.",
+        category: "getting-started",
+        tags: "getting started setup activation guide tutorial onboarding"
+    },
+    {
+        title: "How to Use WhatFlow CRM",
         summary: "Learn the basics of sending broadcast messages to multiple WhatsApp numbers in just a few clicks.",
         icon: "logo/broadcast.png",
         category: "getting-started",
@@ -9,7 +104,7 @@ const BLOG_DATA = [
         steps: [
             {
                 title: "Enter Recipient Numbers",
-                description: 'Open the Pro Sender popup from the Chrome toolbar. In the <strong>numbers box</strong>, enter the phone numbers of recipients separated by commas, or paste them one per line. You can also select a country code from the dropdown for your region.'
+                description: 'Open the WhatFlow CRM popup from the Chrome toolbar. In the <strong>numbers box</strong>, enter the phone numbers of recipients separated by commas, or paste them one per line. You can also select a country code from the dropdown for your region.'
             },
             {
                 title: "Compose Your Message",
@@ -17,10 +112,10 @@ const BLOG_DATA = [
             },
             {
                 title: "Hit Send",
-                description: 'Click the <strong>Send</strong> button. Pro Sender will automatically open each chat and deliver your message one by one. You can sit back while it handles the rest.'
+                description: 'Click the <strong>Send</strong> button. WhatFlow CRM will automatically open each chat and deliver your message one by one. You can sit back while it handles the rest.'
             }
         ],
-        tip: "Make sure WhatsApp Web is open and logged in before sending. Pro Sender will open it automatically if it isn't."
+        tip: "Make sure WhatsApp Web is open and logged in before sending. WhatFlow CRM will open it automatically if it isn't."
     },
     {
         title: "How to Send Attachments",
@@ -126,7 +221,7 @@ const BLOG_DATA = [
         steps: [
             {
                 title: "Open the Feature",
-                description: 'In the Pro Sender popup, scroll to the bottom section and click <strong>"How to export unsaved chat contacts?"</strong>. This will trigger the export flow on WhatsApp Web.'
+                description: 'In the WhatFlow CRM popup, scroll to the bottom section and click <strong>"How to export unsaved chat contacts?"</strong>. This will trigger the export flow on WhatsApp Web.'
             },
             {
                 title: "Download the File",
@@ -137,7 +232,7 @@ const BLOG_DATA = [
     },
     {
         title: "How to Schedule Campaigns",
-        summary: "Set up your campaign now and let Pro Sender send it automatically at your chosen date and time.",
+        summary: "Set up your campaign now and let WhatFlow CRM send it automatically at your chosen date and time.",
         icon: "logo/schedule.png",
         category: "premium",
         tags: "schedule campaign timer auto send later plan time date",
@@ -202,7 +297,7 @@ const BLOG_DATA = [
     },
     {
         title: "Translate the Interface",
-        summary: "Use Pro Sender in your preferred language with the built-in translation feature.",
+        summary: "Use WhatFlow CRM in your preferred language with the built-in translation feature.",
         icon: "logo/prime_language-translate.png",
         category: "getting-started",
         tags: "translate language multilingual popup interface",

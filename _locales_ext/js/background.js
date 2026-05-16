@@ -6,7 +6,7 @@ const countryToDialCode = { AF: "+93", AL: "+355", DZ: "+213", AS: "+1684", AD: 
 const countryWithSpecificPricing = { "IN": 'india', "BR": 'brazil', "EG": 'egypt' };
 
 chrome.runtime.onInstalled.addListener((async function (e) {
-    send_notification("Pro Sender is installed", '');
+    send_notification("WhatFlow CRM is installed", '');
     fetchCountryInfo();
 
     // Check if there is an open WhatsApp Web tab
