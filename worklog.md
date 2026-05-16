@@ -227,3 +227,34 @@ Stage Summary:
 - Extension properly shows "No Active Plan" when deactivated
 - Database is production-ready with clean slate
 - Full E2E flow verified: create → activate → deactivate → verify
+
+---
+Task ID: 3
+Agent: Main Agent (full-stack)
+Task: Fix activation key modal black screen in Chrome extension
+
+Work Log:
+- Root cause: position:fixed in Chrome extension popups positions relative to
+  the entire SCREEN, not the popup viewport
+- The modal form was rendering at left:50% of screen width (completely off-screen)
+- The massive 2848x1440px backdrop covered the popup creating "black screen"
+- Also found and removed stray unclosed <div> tag that could clip modal
+
+Fixes in popup.html:
+- Modal container: position:absolute (was fixed), 100% width/height (was 2848x1440)
+- Backdrop: position:absolute 100%x100% (fills popup, not entire screen)
+- Form: position:absolute centered with transform:translate(-50%,-50%) (was top:140px, left:50%)
+- Compact form sizing: 300px wide (was 320px)
+- Removed stray unclosed <div> tag before modal
+
+Fixes in popup.css:
+- Body: added min-height:500px for consistent modal rendering
+
+Verified:
+- E2E test passed on live: Create key → Activate → Status shows Advance with 21 features
+- Database cleaned: 0 users, 0 keys (production ready)
+
+Stage Summary:
+- Activation key modal now uses absolute positioning compatible with Chrome popups
+- Form is centered in the popup viewport, not the screen
+- No more "black screen" - backdrop and form both visible within popup bounds
