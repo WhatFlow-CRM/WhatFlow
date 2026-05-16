@@ -390,3 +390,58 @@ Stage Summary:
 - Pending input is automatically processed into tags before validation
 - Both Send and Schedule functions fixed
 - Committed: 88c8ba1, pushed to GitHub, extension ZIP updated
+
+---
+Task ID: 9
+Agent: Main Agent
+Task: Update Chrome Extension branding, onboarding, and security
+
+Work Log:
+- Comprehensive audit of all files for old branding (Pro Sender, PR Sender, prosender, mobbana)
+- Found 18 user-facing "Pro Sender" references, 4 broken GIF tutorials, old logo references
+- Admin panel (src/) was already clean — zero old branding found
+
+Branding fixes (9 files modified):
+1. blog.html: title, logo refs, header, footer all rebranded (7 edits)
+2. js/blog.js: all guide content rebranded + comprehensive onboarding guide added
+3. js/background.js: installation notification "WhatFlow CRM is installed"
+4. js/Utils/messenger.js: share message + review popup rebranded
+5. js/Utils/translate.js: translate button "Translate using WhatFlow CRM"
+6. js/Utils/data.js: 8 help messages + 1 FAQ entry rebranded
+7. js/popup.js: analytics event renamed, logo reference fixed
+8. js/Utils/popup-handler.js: broken GIF carousel replaced with text-based onboarding
+
+New "How to Use WhatFlow CRM" guide (8 steps):
+1. Activate Your Key (WF-XXXX-XXXX-XXXX-XXXX format)
+2. Enter/Import Phone Numbers (manual, Excel, campaign)
+3. Write or Select Message Templates
+4. Use Time Gap and Batching
+5. Schedule Campaigns
+6. Send Messages
+7. View Delivery Reports
+8. Contact Support
+
+Security verified:
+- Plan limits controlled server-side (syncPlanWithServer on every popup open)
+- Server forces FreeTrial when isActive=false (anti-bypass)
+- No DB keys, admin API keys, or env secrets in extension code
+- Only GA measurement secret (client-side analytics, expected)
+
+NOT changed (preserved working functionality):
+- window.ProSender object, ProSender:: custom events (internal code)
+- CSS variable names, localStorage keys, DOM IDs
+- Activation key flow, message sending flow, admin panel
+- All API endpoints, database connections, deployment settings
+
+Deployment:
+- Commit: d68b8f9 pushed to GitHub (WhatFlow-CRM/WhatFlow main)
+- Extension ZIP updated at public/WhatFlow-CRM-Extension.zip (3.2MB)
+- Vercel deployment: https://what-flow.vercel.app (HTTP 200)
+
+Stage Summary:
+- Zero user-facing "Pro Sender" references remain (only 2 code comments in inject.js)
+- Zero broken GIF references remain
+- Zero old logo references remain
+- Comprehensive onboarding guide added
+- All 7 modified JS files pass syntax check
+- All working features preserved and unchanged
