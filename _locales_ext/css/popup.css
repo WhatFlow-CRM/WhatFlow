@@ -63,6 +63,7 @@ body{
     overflow: hidden;
     cursor: default;
     position: relative;
+    min-height: 500px;
 }
 
 .black_background {
