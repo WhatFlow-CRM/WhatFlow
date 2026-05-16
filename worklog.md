@@ -366,3 +366,27 @@ Stage Summary:
 - All number entry methods verified working: manual, multiple, Excel import, campaign dropdown
 - Syntax check passed (node -c)
 - No changes to activation key system, admin panel, or any other working feature
+
+---
+Task ID: 8
+Agent: Main Agent
+Task: Fix message sending - numbers not detected when user clicks Send without pressing Enter first
+
+Work Log:
+- Analyzed screenshot: user typed +92 3325748484 and clicked Send directly
+- Number stayed as raw text in #numbers-input (no blur/Enter event fired)
+- No number tags were created, hidden textarea stayed empty
+- sendMessageFunction() read from empty tags → "Please enter numbers to send" error
+
+Root cause: The blur/keydown handler on #numbers-input only fires on Enter, comma, or blur. If user types number and immediately clicks Send, the input is never processed.
+
+Fix applied:
+- sendMessageFunction() (line 1190): Added pre-check for pending text in #numbers-input before reading numbers. If valid numbers found, processes them into tags first.
+- Schedule function (line 2166): Same fix applied for schedule flow.
+- Extension ZIP rebuilt with latest fix
+
+Stage Summary:
+- User can now type a number and click Send immediately (no Enter/blur required)
+- Pending input is automatically processed into tags before validation
+- Both Send and Schedule functions fixed
+- Committed: 88c8ba1, pushed to GitHub, extension ZIP updated
