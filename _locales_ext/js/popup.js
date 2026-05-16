@@ -1188,6 +1188,18 @@ async function sendMessageFunction() {
     chrome.storage.local.set({ 'captionForIndividualAttachment': [] })
     document.querySelector(".captionTextAreas").innerHTML="";
     const messageSendingTo= messageToggleSwitchValue;
+    
+    // IMPORTANT: First process any unprocessed text still in the input field
+    // (user may have typed a number and clicked Send without pressing Enter/blur)
+    const pendingInput = $('#numbers-input').val();
+    if (pendingInput && pendingInput.trim()) {
+        const filtered = getFilteredNumbers(pendingInput.trim());
+        if (filtered) {
+            $('#numbers-input').val('');
+            addNumberTags(pendingInput.trim());
+        }
+    }
+    
     // Read numbers directly from visual tags (primary) with fallback to hidden textarea
     var numbers_str = Array.from(document.querySelectorAll('#numbers-display .number-tag .number'))
         .map(el => el.textContent.trim())
@@ -2155,6 +2167,17 @@ function getMessage() {
             var messageSendingTo = messageToggleSwitchValue || 'numbers';
             var schedule_time = document.querySelector("#schedule_time").value;
             var schedule_date= document.querySelector("#schedule_day").value;
+            
+            // IMPORTANT: First process any unprocessed text still in the input field
+            const pendingInputSchedule = $('#numbers-input').val();
+            if (pendingInputSchedule && pendingInputSchedule.trim()) {
+                const filteredSchedule = getFilteredNumbers(pendingInputSchedule.trim());
+                if (filteredSchedule) {
+                    $('#numbers-input').val('');
+                    addNumberTags(pendingInputSchedule.trim());
+                }
+            }
+            
             // Read numbers directly from visual tags (primary) with fallback to hidden textarea
             var numbers_str = Array.from(document.querySelectorAll('#numbers-display .number-tag .number'))
                 .map(el => el.textContent.trim())
