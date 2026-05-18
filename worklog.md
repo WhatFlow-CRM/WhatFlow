@@ -660,3 +660,21 @@ Stage Summary:
 - Download API route fixed to serve correct file
 - Extension available at: https://what-flow.vercel.app/WhatFlow-CRM-Extension.zip
 - All 13 preserved features intact and working
+
+---
+Task ID: 11
+Agent: Main Agent
+Task: Fix textContent null error + push clean extension to Vercel
+
+Work Log:
+- Fixed jQuery Deferred exception: Cannot set properties of null (setting 'textContent')
+  - Root cause: document.getElementById('extension-version') returned null (element doesn't exist in popup.html)
+  - Fix: Added null safety check in popup.js line 3534
+- Rebuilt extension ZIP (3.2MB, clean, no CRM tools)
+- Pushed to GitHub (commit 31ee3de) to trigger Vercel deployment
+- Fixed download API route (already done in previous step)
+
+Stage Summary:
+- textContent null error fixed with null safety check
+- Clean extension ZIP pushed to GitHub and deploying to Vercel
+- Download will be available at https://what-flow.vercel.app/WhatFlow-CRM-Extension.zip after Vercel finishes deploying (~1-2 min)
