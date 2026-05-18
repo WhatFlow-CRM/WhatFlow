@@ -616,3 +616,30 @@ Stage Summary:
 - All existing features preserved and unchanged
 - Pushed to GitHub (commits b2e9f17, a8915ea)
 - Extension ZIP rebuilt at public/WhatFlow-CRM-Extension.zip
+
+---
+Task ID: 1
+Agent: Main Agent
+Task: Remove CRM Tools button and newly added features from Chrome Extension, update How to Use
+
+Work Log:
+- Read all extension files to identify CRM-related code
+- Identified crm-tools.js as standalone file with all CRM feature logic
+- Identified CRM Tools tab button in popup.html header (lines 72-79)
+- Identified CRM Tools Panel HTML in popup.html (lines 1022-1083)
+- Identified CRM styles at end of popup.css (lines 3718-3772)
+- Removed crm-tools.js script tag from popup.html
+- Removed CRM Tools tab button from header (reverted to 2-column layout)
+- Removed entire CRM Tools Panel HTML section
+- Fixed typo in How to Use customized messages button text (removed trailing space before ?)
+- Deleted crm-tools.js file entirely
+- Removed CRM Tools Panel CSS styles (all .crm-* classes)
+- Verified all 13+ preserved features still intact in HTML
+- Confirmed no CRM references remain in popup.js (only branding text)
+
+Stage Summary:
+- CRM Tools button, panel, JS file, and CSS styles completely removed
+- Extension reverted to clean 2-tab layout (WhatFlow CRM + Premium/Features)
+- All preserved features verified intact: activation key, plan limits, manual entry, Excel import, campaign dropdown, templates, time gap, batching, scheduling, upcoming campaigns, resume paused, delivery reports, branding, How to Use
+- No changes to manifest.json or popup.js (no changes needed)
+- Admin Panel left untouched

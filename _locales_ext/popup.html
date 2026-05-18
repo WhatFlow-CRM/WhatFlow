@@ -19,7 +19,6 @@
         <script src="js/emoji-picker.js"></script>
 
         <script src="js/popup.js"></script>
-        <script src="js/crm-tools.js"></script>
         
         <link href='https://fonts.googleapis.com/css?family=PT Sans Caption' rel='stylesheet'>
         <link rel="stylesheet" href="css/intlTelInput.css">
@@ -66,14 +65,6 @@
                     <div id="select_functionality" class="header-tab-content functionality-tab-content">
                         <img src="logo/logo-img.png" style="width: 36px;" class="headerImg" />
                         <div style="padding: 8px;" id="ps-logo-right" class="headerLogoText">WhatFlow CRM</div>
-                    </div>
-                </div>
-            </div>
-            <div style="display: flex; justify-content: center;">
-                <div id="select_crm_tools_container" class="CtaPopupHeader header-tab crm-tab">
-                    <div id="select_crm_tools" class="header-tab-content crm-tab-content" style="display:flex;align-items:center;gap:4px;">
-                        <span style="font-size:16px;">📋</span>
-                        <div style="padding:8px;font-size:13px;">CRM Tools</div>
                     </div>
                 </div>
             </div>
@@ -941,7 +932,7 @@
                         <button class="attachment-instructions-btn customize" id="how_to_send_customized_messages">
                             <span class="attachment-instructions-icon attachment-instructions">i</span>
                             <span class="attachment-instructions-text attachment-instructions CtaBtn"
-                                data-translate-text>How to send customized messages ?</span>
+                                data-translate-text>How to send customized messages?</span>
                         </button>
                     </div>           
                 </div>
@@ -1019,68 +1010,7 @@
         </div>
     </div>
 
-    <!-- ═══════════════════ CRM Tools Panel ═══════════════════ -->
-    <div id="crm_tools_panel" style="display:none; background:#fff; width:100%; padding:8px; font-family:'PT Sans Caption';">
-        <div class="crm-subtabs" style="display:flex; gap:2px; margin-bottom:8px; flex-wrap:wrap;">
-            <button class="crm-subtab active" data-panel="crm-leads">📊 Leads</button>
-            <button class="crm-subtab" data-panel="crm-ai">🤖 AI Reply</button>
-            <button class="crm-subtab" data-panel="crm-reminders">⏰ Reminders</button>
-            <button class="crm-subtab" data-panel="crm-blacklist">🚫 Blacklist</button>
-            <button class="crm-subtab" data-panel="crm-analytics">📈 Analytics</button>
-        </div>
-        <div id="crm-leads" class="crm-panel active">
-            <div class="crm-panel-header"><span>Lead Management</span><button id="crm-add-lead-btn" class="crm-btn">+ Add</button></div>
-            <div id="crm-leads-list" class="crm-list custom-scrollbar"><div class="crm-empty">Loading leads...</div></div>
-            <div id="crm-add-lead-form" style="display:none;">
-                <input id="crm-lead-phone" placeholder="Phone Number (required)" />
-                <input id="crm-lead-name" placeholder="Name (optional)" />
-                <select id="crm-lead-status">
-                    <option value="new">New Lead</option><option value="interested">Interested</option><option value="followup">Follow-up Required</option><option value="converted">Converted</option><option value="not_interested">Not Interested</option><option value="complaint">Complaint</option><option value="pending_payment">Pending Payment</option>
-                </select>
-                <textarea id="crm-lead-notes" placeholder="Notes (optional)" rows="2"></textarea>
-                <div style="display:flex;gap:4px;"><button id="crm-save-lead" class="crm-btn crm-btn-primary">Save</button><button id="crm-cancel-lead" class="crm-btn">Cancel</button></div>
-            </div>
-        </div>
-        <div id="crm-ai" class="crm-panel" style="display:none;">
-            <div class="crm-panel-header"><span>AI Suggested Replies</span></div>
-            <select id="crm-ai-mode"><option value="suggest">Suggest Replies</option><option value="rewrite">Rewrite Message</option></select>
-            <textarea id="crm-ai-input" placeholder="Paste customer message or draft to improve..." rows="3"></textarea>
-            <select id="crm-ai-tone"><option value="professional">Professional</option><option value="friendly">Friendly</option><option value="short">Short</option><option value="detailed">Detailed</option><option value="urdu">اردو (Urdu)</option><option value="english">English</option><option value="roman_urdu">Roman Urdu</option></select>
-            <button id="crm-ai-generate" class="crm-btn crm-btn-primary" style="width:100%;">✨ Generate AI Reply</button>
-            <div id="crm-ai-loading" style="display:none;text-align:center;padding:8px;color:#888;font-size:11px;">Generating reply...</div>
-            <div id="crm-ai-results" style="margin-top:8px;"></div>
-        </div>
-        <div id="crm-reminders" class="crm-panel" style="display:none;">
-            <div class="crm-panel-header"><span>Follow-up Reminders</span><button id="crm-add-reminder-btn" class="crm-btn">+ Add</button></div>
-            <div id="crm-reminders-list" class="crm-list custom-scrollbar"><div class="crm-empty">Loading reminders...</div></div>
-            <div id="crm-add-reminder-form" style="display:none;">
-                <input id="crm-reminder-phone" placeholder="Phone Number" />
-                <div style="display:flex;gap:4px;"><input id="crm-reminder-date" type="date" /><input id="crm-reminder-time" type="time" /></div>
-                <textarea id="crm-reminder-note" placeholder="Note" rows="2"></textarea>
-                <div style="display:flex;gap:4px;"><button id="crm-save-reminder" class="crm-btn crm-btn-primary">Save</button><button id="crm-cancel-reminder" class="crm-btn">Cancel</button></div>
-            </div>
-        </div>
-        <div id="crm-blacklist" class="crm-panel" style="display:none;">
-            <div class="crm-panel-header"><span>Do Not Message</span><button id="crm-add-blacklist-btn" class="crm-btn">+ Add</button></div>
-            <div style="background:#fef3c7;padding:4px 8px;border-radius:4px;font-size:10px;margin-bottom:6px;">⚠️ Blacklisted numbers are automatically excluded from campaigns.</div>
-            <div id="crm-blacklist-list" class="crm-list custom-scrollbar"><div class="crm-empty">Loading blacklist...</div></div>
-            <div id="crm-add-blacklist-form" style="display:none;">
-                <input id="crm-blacklist-phone" placeholder="Phone Number" />
-                <select id="crm-blacklist-reason"><option value="opted_out">Customer Opted Out</option><option value="wrong_number">Wrong Number</option><option value="complaint">Complaint</option><option value="manual_block">Manual Block</option><option value="other">Other</option></select>
-                <textarea id="crm-blacklist-notes" placeholder="Notes (optional)" rows="2"></textarea>
-                <div style="display:flex;gap:4px;"><button id="crm-save-blacklist" class="crm-btn crm-btn-primary">Add to Blacklist</button><button id="crm-cancel-blacklist" class="crm-btn">Cancel</button></div>
-            </div>
-        </div>
-        <div id="crm-analytics" class="crm-panel" style="display:none;">
-            <div class="crm-panel-header"><span>Campaign Analytics</span></div>
-            <div id="crm-analytics-loading" style="text-align:center;padding:8px;color:#888;font-size:11px;">Loading analytics...</div>
-            <div id="crm-analytics-content" style="display:none;">
-                <div class="crm-stats-grid" id="crm-stats-grid"></div>
-                <h4 style="margin:8px 0 4px;font-size:12px;">Recent Campaigns</h4>
-                <div id="crm-campaigns-list" class="crm-list custom-scrollbar"><div class="crm-empty">No campaigns yet</div></div>
-            </div>
-        </div>
-    </div>
+
 
     </body>
 </html>
