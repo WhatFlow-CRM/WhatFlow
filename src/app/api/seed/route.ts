@@ -28,18 +28,28 @@ const DEFAULT_FEATURES = [
   { featureKey: 'prioritySupport', displayName: 'Priority Support', description: 'Priority customer support access' },
   { featureKey: 'verifyNumbers', displayName: 'Verify Numbers', description: 'Verify WhatsApp numbers before sending' },
   { featureKey: 'chatSupport', displayName: 'Chat Support', description: 'Direct chat support from extension' },
+  { featureKey: 'messageFormatting', displayName: 'Message Formatting', description: 'Format messages - BOLD, italic, strikethrough, and Emojis' },
+  { featureKey: 'excelPreview', displayName: 'Real-Time Excel Preview', description: 'Real-time preview of uploaded CSV numbers' },
 ];
 
+// Features available in the Basic plan
 const BASIC_FEATURES = [
-  'broadcasting', 'attachments', 'customization', 'quickReplies', 'translation',
-  'timeGapControl', 'randomGap', 'batching', 'caption', 'templates',
-  'deliveryReport', 'blur'
+  'attachments', 'customization', 'translation', 'blur', 'schedule',
+  'businessChatLink', 'exportContacts', 'multipleAttachments', 'prioritySupport',
+  'verifyNumbers', 'chatSupport', 'messageFormatting', 'excelPreview',
 ];
 
+// Advance gets ALL features — Basic features plus Advance-only exclusives
 const ADVANCE_FEATURES = [
   ...BASIC_FEATURES,
-  'schedule', 'businessChatLink', 'exportContacts', 'multipleAttachments',
-  'stopCampaign', 'groupExport', 'prioritySupport', 'verifyNumbers', 'chatSupport'
+  'broadcasting', 'deliveryReport', 'timeGapControl', 'randomGap', 'caption',
+  'quickReplies', 'batching', 'groupExport', 'stopCampaign', 'templates',
+];
+
+// Features that are Advance-only (not available in Basic)
+const ADVANCE_ONLY_FEATURES = [
+  'broadcasting', 'deliveryReport', 'timeGapControl', 'randomGap', 'caption',
+  'quickReplies', 'batching', 'groupExport', 'stopCampaign', 'templates',
 ];
 
 export async function POST(request: NextRequest) {
@@ -74,7 +84,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Upsert plan-feature access
+    // Enable features for Basic plan
     for (const fk of BASIC_FEATURES) {
       await db.planFeatureAccess.upsert({
         where: { planType_featureKey: { planType: 'Basic', featureKey: fk } },
@@ -83,11 +93,21 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Enable features for Advance plan
     for (const fk of ADVANCE_FEATURES) {
       await db.planFeatureAccess.upsert({
         where: { planType_featureKey: { planType: 'Advance', featureKey: fk } },
         update: { isEnabled: true },
         create: { planType: 'Advance', featureKey: fk, isEnabled: true },
+      });
+    }
+
+    // Disable Advance-only features for Basic plan
+    for (const fk of ADVANCE_ONLY_FEATURES) {
+      await db.planFeatureAccess.upsert({
+        where: { planType_featureKey: { planType: 'Basic', featureKey: fk } },
+        update: { isEnabled: false },
+        create: { planType: 'Basic', featureKey: fk, isEnabled: false },
       });
     }
 

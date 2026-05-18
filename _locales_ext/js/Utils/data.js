@@ -117,6 +117,48 @@ let PREMIUM_REMINDER = {
         description: 'to download chat contacts',
     },
 
+    // Server-gated Advance Features
+    broadcasting: {
+        title: 'Broadcasting requires Advance Plan',
+        description: 'Upgrade to Advance Plan to send broadcast messages to multiple contacts at once.'
+    },
+    deliveryReport: {
+        title: 'Reports require Advance Plan',
+        description: 'Upgrade to Advance Plan to get detailed delivery reports for your campaigns.'
+    },
+    timeGapControl: {
+        title: 'Time Gap Control requires Advance Plan',
+        description: 'Upgrade to Advance Plan to customize the time gap between messages.'
+    },
+    randomGap: {
+        title: 'Random Gap requires Advance Plan',
+        description: 'Upgrade to Advance Plan to randomize time gaps between messages.'
+    },
+    caption: {
+        title: 'Caption requires Advance Plan',
+        description: 'Upgrade to Advance Plan to add captions to your attachments.'
+    },
+    quickReplies: {
+        title: 'Quick Replies require Advance Plan',
+        description: 'Upgrade to Advance Plan to use pre-saved quick responses.'
+    },
+    messageFormatting: {
+        title: 'Message Formatting requires Advance Plan',
+        description: 'Upgrade to Advance Plan to format messages with bold, italic, and more.'
+    },
+    groupExport: {
+        title: 'Group Export requires Advance Plan',
+        description: 'Upgrade to Advance Plan to export group member contacts.'
+    },
+    stopCampaign: {
+        title: 'Stop Campaign requires Advance Plan',
+        description: 'Upgrade to Advance Plan to stop messaging mid-campaign.'
+    },
+    templates: {
+        title: 'Templates require Advance Plan',
+        description: 'Upgrade to Advance Plan to save and reuse message templates.'
+    },
+
     // Default data
     default: {
         title: '',

@@ -46,6 +46,7 @@ import {
   ChevronDown,
   Pencil,
   Info,
+  ArrowUpCircle,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -570,6 +571,9 @@ export default function AdminDashboard() {
   const [bulkBlacklistForm, setBulkBlacklistForm] = useState({ numbers: '', reason: 'opted_out' });
   const [blacklistSaving, setBlacklistSaving] = useState(false);
   const [deleteBlacklistDialog, setDeleteBlacklistDialog] = useState<string | null>(null);
+  const [upgradeDialogUser, setUpgradeDialogUser] = useState<User | null>(null);
+  const [upgradeKeyInput, setUpgradeKeyInput] = useState('');
+  const [upgrading, setUpgrading] = useState(false);
 
   // Campaigns state
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -1167,6 +1171,32 @@ export default function AdminDashboard() {
     } finally {
       setAddFeatureLoading(false);
     }
+  };
+
+  // ─── Upgrade User to Advance ─────────────────────────────────────────
+  const handleUpgradeUser = async () => {
+    if (!upgradeDialogUser || !upgradeKeyInput.trim()) {
+      toast.error('Please enter an Advance activation key');
+      return;
+    }
+    setUpgrading(true);
+    try {
+      const res = await fetch('/api/admin/upgrade', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ whatsappNumber: upgradeDialogUser.whatsappNumber, advanceKey: upgradeKeyInput.trim() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`${upgradeDialogUser.whatsappNumber} upgraded to Advance plan!`);
+        setUpgradeDialogUser(null);
+        setUpgradeKeyInput('');
+        fetchUsers();
+      } else {
+        toast.error(data.error || 'Upgrade failed');
+      }
+    } catch { toast.error('Failed to connect to server'); }
+    setUpgrading(false);
   };
 
   // ─── Leads Handlers ─────────────────────────────────────────────────────
@@ -2140,6 +2170,15 @@ export default function AdminDashboard() {
                                         <Eye className="w-4 h-4 mr-2" />
                                         View Details
                                       </DropdownMenuItem>
+                                      {u.planType === 'Basic' && u.isActive && (
+                                        <DropdownMenuItem
+                                          className="text-emerald-600 focus:text-emerald-600"
+                                          onClick={() => { setUpgradeDialogUser(u); setUpgradeKeyInput(''); }}
+                                        >
+                                          <ArrowUpCircle className="w-4 h-4 mr-2" />
+                                          Upgrade to Advance
+                                        </DropdownMenuItem>
+                                      )}
                                       {u.isActive && (
                                         <DropdownMenuItem
                                           className="text-red-600 focus:text-red-600"
@@ -2293,6 +2332,67 @@ export default function AdminDashboard() {
                           Save Changes
                         </Button>
                       </DialogFooter>
+                    </div>
+                  )}
+                </DialogContent>
+              </Dialog>
+
+              {/* Upgrade User Dialog */}
+              <Dialog open={!!upgradeDialogUser} onOpenChange={(open) => { if (!open) setUpgradeDialogUser(null); }}>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <ArrowUpCircle className="w-5 h-5 text-emerald-600" />
+                      Upgrade to Advance Plan
+                    </DialogTitle>
+                    <DialogDescription>
+                      Upgrade this customer from Basic to Advance plan using an activation key.
+                    </DialogDescription>
+                  </DialogHeader>
+                  {upgradeDialogUser && (
+                    <div className="space-y-4">
+                      <div className="bg-zinc-50 rounded-lg p-3 space-y-1.5">
+                        <div className="flex justify-between">
+                          <span className="text-xs text-muted-foreground">Customer</span>
+                          <span className="text-sm font-medium">{formatPhoneNumber(upgradeDialogUser.whatsappNumber)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-xs text-muted-foreground">Current Plan</span>
+                          <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-300">Basic</Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-xs text-muted-foreground">Upgrade To</span>
+                          <Badge variant="outline" className="bg-emerald-100 text-emerald-700 border-emerald-300">Advance</Badge>
+                        </div>
+                      </div>
+
+                      <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                        <p className="text-xs font-medium text-emerald-800 mb-1">Advance Plan unlocks:</p>
+                        <p className="text-xs text-emerald-700">Broadcasting, Reports, Time Gap Control, Random Gap, Caption, Quick Replies, Batching, Group Export, Stop Campaign, Save Templates + all Basic features</p>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-medium">Advance Activation Key</Label>
+                        <Input
+                          placeholder="WF-XXXX-XXXX-XXXX-XXXX"
+                          value={upgradeKeyInput}
+                          onChange={(e) => setUpgradeKeyInput(e.target.value.toUpperCase())}
+                          className="font-mono"
+                        />
+                        <p className="text-xs text-muted-foreground">Generate an Advance key from the Keys tab, then paste it here.</p>
+                      </div>
+
+                      <div className="flex justify-end gap-2">
+                        <Button variant="outline" onClick={() => setUpgradeDialogUser(null)}>Cancel</Button>
+                        <Button
+                          onClick={handleUpgradeUser}
+                          disabled={upgrading || !upgradeKeyInput.trim()}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                        >
+                          {upgrading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                          Upgrade Plan
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </DialogContent>

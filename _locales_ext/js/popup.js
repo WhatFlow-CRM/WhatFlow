@@ -1,4 +1,5 @@
 var csv_data = [], csv_name = "", my_number = null, plan_type = 'Expired',plan_duration = 'Monthly', last_plan_type = 'FreeTrial', customer_email, popup_numbers = "";
+var server_features = {};  // features map from server: { broadcasting: true, schedule: false, ... }
 let currentLanguage = 'default';
 let allLanguageCodes = ALL_LANGUAGE_CODES;
 let libphone = libphonenumber;
@@ -17,9 +18,17 @@ var ADMIN_SERVER_URL = (typeof WHATFLOW_CONFIG !== 'undefined') ? WHATFLOW_CONFI
 
 function syncPlanWithServer(callback) {
     if (!my_number || !ADMIN_SERVER_URL) {
+        // Restore features from cache even on early return
+        chrome.storage.local.get(['server_features'], function(res) {
+            if (res.server_features) server_features = res.server_features;
+        });
         if (callback) callback();
         return;
     }
+    // Restore features from cache while sync happens
+    chrome.storage.local.get(['server_features'], function(res) {
+        if (res.server_features) server_features = res.server_features;
+    });
     var xhr = new XMLHttpRequest();
     xhr.open("GET", ADMIN_SERVER_URL + WHATFLOW_CONFIG.API.EXTENSION_STATUS + "?whatsappNumber=" + encodeURIComponent(my_number), true);
     xhr.timeout = 10000;
@@ -44,6 +53,13 @@ function syncPlanWithServer(callback) {
                     if (data.dailyMessageLimit) handle_message_limit = data.dailyMessageLimit;
                     if (data.subscribedAt) subscribed_date = data.subscribedAt;
                     if (data.expiresAt) _planExpiresAt = data.expiresAt;
+                }
+                // Store features map from server for granular feature gating
+                if (data.features && typeof data.features === 'object') {
+                    server_features = data.features;
+                    chrome.storage.local.set({ server_features: server_features });
+                } else {
+                    server_features = {};
                 }
                 if (data.lastPlanType) last_plan_type = data.lastPlanType;
                 if (data.paymentStatus) _lastPaymentStatus = data.paymentStatus;
@@ -539,15 +555,15 @@ function isExpired() {
 }
 
 function isBasic() {
-    return (plan_type === 'Premium' || plan_type === 'Advance' || plan_type === 'Basic');
+    return (plan_type === 'Basic');
 }
 
 function isAdvance() {
-    return (plan_type === 'Premium' || plan_type === 'Advance' || plan_type === 'Basic');
+    return (plan_type === 'Advance');
 }
 
 function isPremium() {
-    return (plan_type === 'Premium' || plan_type === 'Advance' || plan_type === 'Basic');
+    return (plan_type === 'Advance' || plan_type === 'Basic');
 }
 
 function isFreeTrial() {
@@ -559,7 +575,7 @@ function isTrial() {
 }
 
 function isBasicFeatureAvailable() {
-    return (isBasic() || isTrial());
+    return (isPremium() || isTrial());
 }
 
 function isAdvanceFeatureAvailable() {
@@ -568,6 +584,12 @@ function isAdvanceFeatureAvailable() {
 
 function isPremiumFeatureAvailable() {
     return (isPremium() || isTrial());
+}
+
+// Check if a specific feature is available (server-side gating)
+function hasFeature(featureKey) {
+    if (isAdvance()) return true;  // Advance gets everything
+    return server_features[featureKey] === true;
 }
 
 function setListOrLabel() {
@@ -1799,6 +1821,10 @@ function unset_csv_styles() {
 function getMessage() {
 
     $('#sender').click(function () {
+        if (!hasFeature('broadcasting')) {
+            if (typeof premium_reminder === 'function') premium_reminder('broadcasting', 'Advance');
+            return;
+        }
         messagePreparation();
         trackButtonClick('send_message_button');
     });
@@ -1913,6 +1939,13 @@ function getMessage() {
     $("#batch_checked").on("change", function () {
         const checked = $(this).is(":checked");
 
+        // Feature gate: batching requires Advance or server-enabled
+        if (checked && !hasFeature('batching')) {
+            if (typeof premium_reminder === 'function') premium_reminder('batching', 'Advance');
+            $(this).prop('checked', false);
+            return;
+        }
+
         const $batchInfo = $("#batch_info");
         if (checked) {
             $batchInfo
@@ -1942,6 +1975,11 @@ function getMessage() {
     });
     // if the slider_time_gap values is changed assign its value to the time_gap_value
     $("#slider_time_gap_sec").on("change", function () {
+        // Feature gate: time gap below 30 seconds requires Advance or server-enabled
+        if (!hasFeature('timeGapControl')) {
+            if (typeof premium_reminder === 'function') premium_reminder('time_gap', 'Advance');
+            return;
+        }
         var sliderBtn = document.querySelector("#slider_time_gap_sec");
         var numberBtn = document.querySelector("#time_gap_sec");
         var values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20];
@@ -1957,6 +1995,13 @@ function getMessage() {
     })
     // take input from the input section and stores it in the local storage
     $("#time_gap_sec").on("change", function () {
+        // Feature gate: time gap below 30 seconds requires Advance or server-enabled
+        var newTimeGap = parseInt(document.querySelector("#time_gap_sec").value);
+        if (newTimeGap < 30 && !hasFeature('timeGapControl')) {
+            if (typeof premium_reminder === 'function') premium_reminder('time_gap', 'Advance');
+            document.querySelector("#time_gap_sec").value = 30;
+            return;
+        }
         if (isPremiumFeatureAvailable()) {
             var time_gap = document.querySelector("#time_gap_sec").value;
             var values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20];
@@ -1981,6 +2026,13 @@ function getMessage() {
     })
     // check if the random feature is selected or not
     $("#random").on("change", function () {
+        // Feature gate: random gap requires Advance or server-enabled
+        if (!hasFeature('randomGap')) {
+            if (typeof premium_reminder === 'function') premium_reminder('randomGap', 'Advance');
+            $("#sec").prop('checked', true);
+            disableNumberTimeGapInput("random");
+            return;
+        }
         disableNumberTimeGapInput("sec");
         trackButtonClick('random_delay_changed');
     });
@@ -4132,6 +4184,13 @@ $(document).ready(async function () {
     });
 
     $('#caption-checkbox').change(function () {
+        // Feature gate: caption requires Advance or server-enabled
+        if ($(this).is(":checked") && !hasFeature('caption')) {
+            if (typeof premium_reminder === 'function') premium_reminder('caption', 'Advance');
+            $(this).prop('checked', false);
+            $('#caption-section').prop('hidden', true);
+            return;
+        }
         $('#caption-section').prop('hidden', !$(this).is(":checked"))
         const isChecked= $(this).is(":checked");
         toggleCaptionCustomizationInputDiv();
@@ -4247,6 +4306,11 @@ $(document).ready(async function () {
     })
 
     function wrapSelectedTextOfMessage(ch) {
+        // Feature gate: message formatting requires Advance or server-enabled
+        if (!hasFeature('messageFormatting')) {
+            if (typeof premium_reminder === 'function') premium_reminder('messageFormatting', 'Advance');
+            return;
+        }
         const textarea = document.querySelector('#message');
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
@@ -4278,6 +4342,13 @@ $(document).ready(async function () {
 
     $('#save-template-form').submit(function (e) {
         e.preventDefault();
+
+        // Feature gate: saving templates requires Advance or server-enabled
+        if (!hasFeature('templates')) {
+            if (typeof premium_reminder === 'function') premium_reminder('templates', 'Advance');
+            $('.template-save-popup-container').addClass('hide');
+            return;
+        }
     
         const tempName = $('#template-name').val();
         const tempMessage = $('#template-msg').val();
@@ -4708,6 +4779,11 @@ $(document).ready(async function () {
     }
 
     $('#report-selector').click(function (e) {
+        // Feature gate: delivery reports require Advance or server-enabled
+        if (!hasFeature('deliveryReport')) {
+            if (typeof premium_reminder === 'function') premium_reminder('deliveryReport', 'Advance');
+            return;
+        }
         showReports();
         trackButtonClick('select_delivery_report');
 
