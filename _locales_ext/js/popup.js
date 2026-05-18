@@ -3531,7 +3531,8 @@ $(document).ready(async function () {
     // show version of extension in popup from manifest file
     const manifest = chrome.runtime.getManifest();
     const version = manifest.version;
-    document.getElementById('extension-version').textContent = version;
+    const versionEl = document.getElementById('extension-version');
+    if (versionEl) versionEl.textContent = version;
 
     $('#fetch-google-sheets').on('click', async function() {
         const sheetsUrl = $('#google-sheets-url').val().trim();
