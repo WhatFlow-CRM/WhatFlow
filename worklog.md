@@ -643,3 +643,20 @@ Stage Summary:
 - All preserved features verified intact: activation key, plan limits, manual entry, Excel import, campaign dropdown, templates, time gap, batching, scheduling, upcoming campaigns, resume paused, delivery reports, branding, How to Use
 - No changes to manifest.json or popup.js (no changes needed)
 - Admin Panel left untouched
+
+---
+Task ID: 10
+Agent: Main Agent
+Task: Rebuild extension ZIP + fix download API route
+
+Work Log:
+- Verified CRM Tools removal was already completed in previous session (Task ID 1)
+- Confirmed no CRM-related code remains in popup.html, popup.js, popup.css
+- Rebuilt extension ZIP: public/WhatFlow-CRM-Extension.zip (3.2MB)
+- Fixed /api/download-extension route: now serves WhatFlow-CRM-Extension.zip (was incorrectly serving WhatFlow-Fix.zip 78KB)
+
+Stage Summary:
+- Extension ZIP rebuilt with clean version (no CRM tools, no new features)
+- Download API route fixed to serve correct file
+- Extension available at: https://what-flow.vercel.app/WhatFlow-CRM-Extension.zip
+- All 13 preserved features intact and working
